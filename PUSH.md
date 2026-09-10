@@ -26,9 +26,27 @@ git remote set-url origin <REPO-URL>
 git push -u origin main
 ```
 
-## If this folder has no `.git` directory
+## If this folder has no `.git` directory (this is the likely case)
 
-That happens if the files were copied in without the history. Run:
+Files were written here individually, so the git history did not come with them. You have two
+options.
+
+### Option A — restore the original history from the bundle
+
+`FAIRDRAFT.bundle` in this folder contains the full commit history in a single file.
+
+```bash
+cd ..
+git clone FAIRDRAFT/FAIRDRAFT.bundle FAIRDRAFT-repo
+cd FAIRDRAFT-repo
+git remote set-url origin <REPO-URL>
+git push -u origin main
+```
+
+That gives you a normal repo with both commits and the original commit messages. Delete
+`FAIRDRAFT.bundle` from the working copy once you've cloned it — it isn't repo content.
+
+### Option B — start fresh history here
 
 ```bash
 git init -b main
