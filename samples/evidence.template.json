@@ -1,0 +1,984 @@
+{
+  "scope": {
+    "tenant": "<tenant name>",
+    "capacities": "<capacity names>",
+    "semanticModels": "<models in scope>",
+    "dataAgents": "<agents in scope>",
+    "assessor": "<your name>"
+  },
+  "_legend": {
+    "pass": "Requirement met and evidenced.",
+    "partial": "Partially met, e.g. applied to some models/agents but not all in scope.",
+    "fail": "Requirement not met.",
+    "na": "Out of scope for this estate; removed from both numerator and denominator.",
+    "unknown": "Not yet assessed. Scored as fail but reported separately as assessment debt."
+  },
+  "results": {
+    "TEN-001": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "TEN-002": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "TEN-003": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "TEN-004": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "TEN-005": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "TEN-006": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "TEN-007": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "TEN-008": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "TEN-009": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "CAP-001": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "CAP-002": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "CAP-003": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "CAP-004": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "CAP-005": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "CAP-006": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "WSP-001": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "WSP-002": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "WSP-003": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "WSP-004": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "WSP-005": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "WSP-006": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "WSP-007": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SCH-001": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SCH-002": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SCH-003": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SCH-004": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SCH-005": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SCH-006": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SCH-007": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SCH-008": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SCH-009": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SCH-010": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SCH-011": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SCH-012": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SCH-013": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SCH-014": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SCH-015": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SCH-016": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SCH-017": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SCH-018": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SCH-019": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SCH-020": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SCH-021": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MOD-001": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MOD-002": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MOD-003": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MOD-004": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MOD-005": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MOD-006": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MOD-007": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MOD-008": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MOD-009": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MOD-010": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MEA-001": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MEA-002": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MEA-003": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MEA-004": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MEA-005": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MEA-006": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MEA-007": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MEA-008": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MEA-009": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MEA-010": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MEA-011": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MEA-012": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "DAT-001": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "DAT-002": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "DAT-003": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "DAT-004": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "DAT-005": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MET-001": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MET-002": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MET-003": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MET-004": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MET-005": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MET-006": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MET-007": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MET-008": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MET-009": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "MET-010": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SEC-001": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SEC-002": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SEC-003": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SEC-004": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SEC-005": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SEC-006": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SEC-007": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "SEC-008": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "VER-001": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "VER-002": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "VER-003": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "VER-004": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "VER-005": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "VER-006": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "VER-007": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "INS-001": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "INS-002": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "INS-003": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "INS-004": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "INS-005": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "AGT-001": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "AGT-002": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "AGT-003": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "AGT-004": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "AGT-005": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "AGT-006": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "AGT-007": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "AGT-008": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "AGT-009": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "AGT-010": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "PRF-001": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "PRF-002": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "PRF-003": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "PRF-004": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "PRF-005": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "PRF-006": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "PRF-007": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "PRF-008": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "VAL-001": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "VAL-002": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "VAL-003": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "VAL-004": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "VAL-005": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "VAL-006": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "VAL-007": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "VAL-008": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "VAL-009": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "VAL-010": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "VAL-011": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "VAL-012": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "VAL-013": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "OPS-001": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "OPS-002": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "OPS-003": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "OPS-004": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "OPS-005": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "OPS-006": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    },
+    "OPS-007": {
+      "result": "unknown",
+      "evidence": "",
+      "note": "",
+      "owner": "",
+      "dueDate": ""
+    }
+  }
+}

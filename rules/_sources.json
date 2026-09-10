@@ -1,0 +1,92 @@
+{
+  "sources": {
+    "ms-copilot-evaluate-data": {
+      "title": "Optimize your semantic model for Copilot in Power BI",
+      "url": "https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-evaluate-data",
+      "retrieved": "2026-09-10"
+    },
+    "ms-prepare-data-ai": {
+      "title": "Prepare your data for AI to improve Copilot results (preview)",
+      "url": "https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-prepare-data-ai",
+      "retrieved": "2026-09-10"
+    },
+    "ms-prepare-data-ai-faq": {
+      "title": "Frequently asked questions about preparing data for AI",
+      "url": "https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-prepare-data-ai-faq",
+      "retrieved": "2026-09-10"
+    },
+    "ms-copilot-semantic-models": {
+      "title": "Use Copilot with semantic models in Power BI",
+      "url": "https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-semantic-models",
+      "retrieved": "2026-09-10"
+    },
+    "ms-tutorial-prepare-model": {
+      "title": "Copilot in Power BI tutorial: prepare a semantic model for AI",
+      "url": "https://learn.microsoft.com/en-us/power-bi/create-reports/tutorial-copilot-power-bi-prepare-model",
+      "retrieved": "2026-09-10"
+    },
+    "ms-copilot-enable-powerbi": {
+      "title": "Enable Fabric Copilot for Power BI",
+      "url": "https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-enable-power-bi",
+      "retrieved": "2026-09-10"
+    },
+    "ms-copilot-fabric-overview": {
+      "title": "Overview of Copilot in Fabric",
+      "url": "https://learn.microsoft.com/en-us/fabric/fundamentals/copilot-fabric-overview",
+      "retrieved": "2026-09-10"
+    },
+    "ms-admin-portal-copilot": {
+      "title": "Copilot and Agent admin settings",
+      "url": "https://learn.microsoft.com/en-us/fabric/admin/service-admin-portal-copilot",
+      "retrieved": "2026-09-10"
+    },
+    "ms-concept-data-agent": {
+      "title": "Fabric data agent creation",
+      "url": "https://learn.microsoft.com/en-us/fabric/data-science/concept-data-agent",
+      "retrieved": "2026-09-10"
+    },
+    "ms-agent-best-practices": {
+      "title": "Best practices for configuring your data agent",
+      "url": "https://learn.microsoft.com/en-us/fabric/data-science/data-agent-configuration-best-practices",
+      "retrieved": "2026-09-10"
+    },
+    "ms-agent-semantic-model-bp": {
+      "title": "Semantic model best practices for data agent",
+      "url": "https://learn.microsoft.com/en-us/fabric/data-science/semantic-model-best-practices",
+      "retrieved": "2026-09-10"
+    },
+    "ms-agent-tenant-settings": {
+      "title": "Configure Fabric data agent tenant settings",
+      "url": "https://learn.microsoft.com/en-us/fabric/data-science/data-agent-tenant-settings",
+      "retrieved": "2026-09-10"
+    },
+    "ms-agent-consumption": {
+      "title": "Data agent consumption",
+      "url": "https://learn.microsoft.com/en-us/fabric/fundamentals/data-agent-consumption",
+      "retrieved": "2026-09-10"
+    },
+    "practice": {
+      "title": "Established semantic modeling / Copilot tuning practice (not a single Microsoft doc)",
+      "url": null,
+      "retrieved": "2026-09-10",
+      "note": "Rules marked with this source are engineering judgement built on standard star-schema and DAX practice plus the grounding behaviour documented above. Verify against your own tenant before treating as normative."
+    },
+    "azs-cwyd": {
+      "title": "Azure-Samples/chat-with-your-data-solution-accelerator",
+      "url": "https://github.com/Azure-Samples/chat-with-your-data-solution-accelerator",
+      "retrieved": "2026-09-10",
+      "note": "RAG accelerator over unstructured data. Its architecture differs from Fabric's natural-language-to-DAX/SQL path, so it is used here for the evaluation and configuration-tuning discipline it documents, not for retrieval mechanics."
+    },
+    "azs-cwyd-bp": {
+      "title": "chat-with-your-data-solution-accelerator - best practices",
+      "url": "https://github.com/Azure-Samples/chat-with-your-data-solution-accelerator/blob/main/docs/best_practices.md",
+      "retrieved": "2026-09-10"
+    },
+    "ms-rag-experiment": {
+      "title": "microsoft/rag-experiment-accelerator",
+      "url": "https://github.com/microsoft/rag-experiment-accelerator",
+      "retrieved": "2026-09-10",
+      "note": "Source of the answer-relevance / context-precision / context-recall / MAP@k evaluation vocabulary and the sweep-and-measure tuning method adapted here."
+    }
+  }
+}

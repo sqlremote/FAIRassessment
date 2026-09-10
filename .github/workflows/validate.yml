@@ -1,0 +1,127 @@
+name: Validate rule pack
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install jsonschema openpyxl
+
+      - name: Rule pack validates against its schema
+        run: |
+          python3 - <<'PY'
+          import json, jsonschema
+          cfg = json.load(open('AssessmentRules.json'))
+          jsonschema.validate(cfg, json.load(open('assessment-rules.schema.json')))
+          print(f"OK  {cfg['ruleCount']} rules validate against the schema")
+          PY
+
+      - name: Rules build cleanly from source fragments
+        run: python3 src/build_rules.py
+
+      - name: Committed AssessmentRules.json matches a fresh build
+        run: |
+          if ! git diff --quiet -- AssessmentRules.json; then
+            echo "::error::AssessmentRules.json is out of sync with rules/."
+            echo "Run: python3 src/build_rules.py && python3 src/build_workbook.py && python3 src/build_page.py"
+            git diff --stat -- AssessmentRules.json
+            exit 1
+          fi
+          echo "OK  committed rule pack matches rules/"
+
+      - name: Every rule cites a resolvable source
+        run: |
+          python3 - <<'PY'
+          import json, sys
+          cfg = json.load(open('AssessmentRules.json'))
+          bad = []
+          for r in cfg['rules']:
+              if not r.get('sourceIds'):
+                  bad.append(f"{r['id']}: no sourceIds")
+              for s in r.get('sourceIds', []):
+                  if s not in cfg['sources']:
+                      bad.append(f"{r['id']}: unknown source {s!r}")
+              if r.get('limit', {}).get('hard') and r['verified'] != 'documented':
+                  bad.append(f"{r['id']}: hard limit must be verified=documented, got {r['verified']!r}")
+          unused = sorted(set(cfg['sources']) - {s for r in cfg['rules'] for s in r['sourceIds']})
+          if unused:
+              bad.append(f"unused sources: {unused}")
+          if bad:
+              print('\n'.join('::error::' + b for b in bad)); sys.exit(1)
+          d = sum(1 for r in cfg['rules'] if r['verified'] == 'documented')
+          print(f"OK  {len(cfg['rules'])} rules sourced ({d} documented, {len(cfg['rules'])-d} inferred), "
+                f"{len(cfg['sources'])} sources all referenced")
+          PY
+
+      - name: Harness runs on the sample evidence
+        run: |
+          python3 src/assess.py --rules AssessmentRules.json --validate
+          python3 src/assess.py --rules AssessmentRules.json \
+            --evidence samples/evidence.sample.json \
+            --out-json /tmp/findings.json --out-md /tmp/findings.md
+
+      - name: Blocker gate fires as designed
+        run: |
+          set +e
+          python3 src/assess.py --rules AssessmentRules.json \
+            --evidence samples/evidence.template.json --out-md /dev/null --fail-on-blocker
+          code=$?
+          set -e
+          if [ "$code" -ne 2 ]; then
+            echo "::error::Expected exit 2 from an all-unknown evidence file, got $code"
+            exit 1
+          fi
+          echo "OK  blocker gate returns exit 2 on unassessed blockers"
+
+      - name: Console and harness score identically
+        run: |
+          python3 - <<'PY'
+          import json, re, subprocess, sys
+          page = open('readiness-console.html').read()
+          pack = re.search(r'const PACK = (\{.*?\});\n', page, re.S).group(1)
+          ev = json.load(open('samples/evidence.sample.json'))['results']
+          js = f"""
+          const PACK={pack}, RESULTS={json.dumps(ev)};
+          const RULES=PACK.rules,SEV=PACK.severities,ST=PACK.resultStates,AREAW=PACK.areaWeights;
+          const w=r=>SEV[r.severity].weight*(r.weightMultiplier||1);
+          const A={{}}; for(const a of PACK.areas) A[a.id]={{e:0,p:0}};
+          for(const r of RULES){{const res=(RESULTS[r.id]||{{}}).result||"unknown";
+            const c=ST[res].credit; if(c!==null){{A[r.area].e+=c*w(r);A[r.area].p+=w(r);}}}}
+          const rows=PACK.areas.map(a=>({{w:AREAW[a.id],
+            s:A[a.id].p?Math.round(1000*A[a.id].e/A[a.id].p)/10:null}})).filter(r=>r.s!==null);
+          const tw=rows.reduce((s,r)=>s+r.w,0);
+          console.log(Math.round(10*rows.reduce((s,r)=>s+r.s*r.w,0)/tw)/10);
+          """
+          open('/tmp/c.js','w').write(js)
+          console = float(subprocess.check_output(['node','/tmp/c.js']).decode().strip())
+          rep = json.load(open('/tmp/findings.json'))
+          if abs(console - rep['overallScore']) > 0.051:
+              print(f"::error::console {console} != harness {rep['overallScore']}"); sys.exit(1)
+          print(f"OK  console and harness both score {console}")
+          PY
+
+      - name: Workbook rebuilds and formulas are error-free
+        run: |
+          python3 src/build_workbook.py
+          python3 - <<'PY'
+          from openpyxl import load_workbook
+          wb = load_workbook('AssessmentRules.xlsx')
+          import json
+          n = json.load(open('AssessmentRules.json'))['ruleCount']
+          rows = sum(ws.max_row - 2 for ws in wb.worksheets
+                     if ws.title not in ('Readme','Scoring','Sources','Limits','All rules'))
+          assert rows == n, f"workbook holds {rows} rule rows, pack has {n}"
+          print(f"OK  workbook rebuilt with {rows} rule rows across {len(wb.sheetnames)} sheets")
+          PY

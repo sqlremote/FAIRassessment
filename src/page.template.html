@@ -1,0 +1,919 @@
+<title>Fabric AI Readiness Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap">
+<style>
+:root{
+  --ground:#EEF1F4; --surface:#FFFFFF; --surface-2:#F6F8F9; --sunken:#E4E9ED;
+  --ink:#141A20; --ink-2:#3D4852; --muted:#697682; --line:#D3DBE1; --line-2:#E7ECF0;
+  --accent:#12657E; --accent-ink:#0C4A5D; --accent-wash:#DCEBF1;
+  --pass:#2C7A4B; --pass-wash:#DCEEE2;
+  --partial:#9C6A08; --partial-wash:#F6EBD3;
+  --fail:#AE3229; --fail-wash:#F7E0DD;
+  --na:#6C7883; --na-wash:#E6EAEE;
+  --blocker:#8B1E1E; --unknown:#8B96A1;
+  --shadow:0 1px 2px rgba(20,26,32,.06),0 4px 16px -6px rgba(20,26,32,.14);
+  --r:7px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0F1418; --surface:#181E24; --surface-2:#1E252C; --sunken:#0A0E11;
+    --ink:#E4EAEF; --ink-2:#BAC4CD; --muted:#8A96A2; --line:#2C353D; --line-2:#232B32;
+    --accent:#5FB9D6; --accent-ink:#8FD2E8; --accent-wash:#16323D;
+    --pass:#5FBE87; --pass-wash:#16301F;
+    --partial:#DCA946; --partial-wash:#33280F;
+    --fail:#E5786D; --fail-wash:#361A17;
+    --na:#8A96A2; --na-wash:#232B32;
+    --blocker:#D8564D; --unknown:#7A8590;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 16px -6px rgba(0,0,0,.5);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0F1418; --surface:#181E24; --surface-2:#1E252C; --sunken:#0A0E11;
+  --ink:#E4EAEF; --ink-2:#BAC4CD; --muted:#8A96A2; --line:#2C353D; --line-2:#232B32;
+  --accent:#5FB9D6; --accent-ink:#8FD2E8; --accent-wash:#16323D;
+  --pass:#5FBE87; --pass-wash:#16301F;
+  --partial:#DCA946; --partial-wash:#33280F;
+  --fail:#E5786D; --fail-wash:#361A17;
+  --na:#8A96A2; --na-wash:#232B32;
+  --blocker:#D8564D; --unknown:#7A8590;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 16px -6px rgba(0,0,0,.5);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1360px; margin:0 auto; padding-inline:20px; padding-block:0 56px}
+h1,h2,h3{margin:0; text-wrap:balance; font-weight:600; letter-spacing:-.011em}
+p{margin:0}
+button{font:inherit; color:inherit; cursor:pointer; background:none; border:none}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:3px}
+.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-variant-numeric:tabular-nums}
+.eyebrow{font-size:10.5px; font-weight:600; letter-spacing:.10em; text-transform:uppercase;
+  color:var(--muted); font-family:"IBM Plex Sans",sans-serif}
+
+/* ---------- masthead ---------- */
+.mast{border-bottom:1px solid var(--line); background:var(--surface)}
+.mast-in{max-width:1360px; margin:0 auto; padding:18px 20px 0;
+  display:flex; flex-wrap:wrap; gap:22px; align-items:flex-start}
+.brand{flex:1 1 260px; min-width:0}
+.brand h1{font-size:20px; line-height:1.25}
+.brand .sub{color:var(--muted); font-size:12.5px; margin-top:4px}
+.brand .sub b{color:var(--ink-2); font-weight:500}
+
+/* score block */
+.stats{display:flex; gap:0; align-items:stretch; flex:0 1 auto; align-self:center;
+  border:1px solid var(--line); border-radius:var(--r); overflow:hidden; background:var(--surface-2)}
+.stats div{padding:8px 15px; border-right:1px solid var(--line); min-width:74px}
+.stats div:last-child{border-right:none}
+.stats .n{font-size:19px; font-weight:600; letter-spacing:-.02em; line-height:1.15;
+  font-family:"IBM Plex Mono",monospace}
+.stats .l{font-size:9.5px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--muted); margin-top:2px; white-space:nowrap}
+@media (max-width:760px){.stats{display:none}}
+.score{display:flex; gap:18px; align-items:center; flex:0 0 auto}
+.gauge{position:relative; width:104px; height:104px; flex:none}
+.gauge svg{display:block; width:104px; height:104px; transform:rotate(-90deg)}
+.gauge .val{position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:0}
+.gauge .num{font-size:27px; font-weight:600; letter-spacing:-.03em; line-height:1}
+.gauge .den{font-size:9.5px; color:var(--muted); letter-spacing:.08em; margin-top:3px}
+.ladder{display:flex; flex-direction:column; gap:3px; min-width:172px}
+.ladder .step{display:flex; align-items:center; gap:8px; font-size:11.5px;
+  color:var(--muted); padding:2px 7px; border-radius:4px; border:1px solid transparent}
+.ladder .step .dot{width:6px; height:6px; border-radius:50%; background:var(--line); flex:none}
+.ladder .step.on{color:var(--ink); font-weight:600; background:var(--accent-wash);
+  border-color:color-mix(in srgb,var(--accent) 30%,transparent)}
+.ladder .step.on .dot{background:var(--accent)}
+.ladder .step.gated.on{background:var(--fail-wash);
+  border-color:color-mix(in srgb,var(--fail) 34%,transparent)}
+.ladder .step.gated.on .dot{background:var(--fail)}
+
+/* tabs */
+.tabs{display:flex; gap:2px; margin-top:16px; max-width:1360px;
+  margin-inline:auto; padding-inline:20px; flex-wrap:wrap}
+.tab{padding:8px 14px 9px; font-size:13px; font-weight:500; color:var(--muted);
+  border-bottom:2px solid transparent; border-radius:5px 5px 0 0}
+.tab:hover{color:var(--ink); background:var(--surface-2)}
+.tab[aria-selected="true"]{color:var(--accent-ink); border-bottom-color:var(--accent);
+  font-weight:600}
+.tab .n{font-size:11px; color:var(--muted); margin-left:5px;
+  font-family:"IBM Plex Mono",monospace}
+
+/* ---------- banners ---------- */
+.banner{display:flex; gap:12px; align-items:flex-start; padding:12px 15px;
+  border-radius:var(--r); margin-top:18px; font-size:13px; border:1px solid}
+.banner .bt{font-weight:600; display:block; margin-bottom:2px}
+.banner.gate{background:var(--fail-wash); border-color:color-mix(in srgb,var(--fail) 38%,transparent);
+  color:var(--ink)}
+.banner.gate .mark{color:var(--fail); font-weight:700; font-size:15px; line-height:1.3}
+.banner.demo{background:var(--partial-wash);
+  border-color:color-mix(in srgb,var(--partial) 40%,transparent)}
+.banner.ok{background:var(--pass-wash); border-color:color-mix(in srgb,var(--pass) 34%,transparent)}
+.banner .body{flex:1; min-width:0}
+.banner .gate-list{margin-top:6px; display:flex; flex-wrap:wrap; gap:5px}
+.banner .gate-list button{font-size:11px; padding:2px 7px; border-radius:4px;
+  border:1px solid color-mix(in srgb,var(--fail) 40%,transparent);
+  background:var(--surface); color:var(--fail); font-weight:600;
+  font-family:"IBM Plex Mono",monospace}
+.banner .gate-list button:hover{background:var(--fail); color:var(--surface)}
+.btn{font-size:12px; font-weight:600; padding:6px 12px; border-radius:5px;
+  border:1px solid var(--line); background:var(--surface); color:var(--ink); white-space:nowrap}
+.btn:hover{border-color:var(--accent); color:var(--accent-ink)}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:#fff}
+.btn.primary:hover{background:var(--accent-ink); color:#fff}
+
+/* ---------- layout ---------- */
+.cols{display:grid; grid-template-columns:266px minmax(0,1fr); gap:22px; margin-top:20px;
+  align-items:start}
+@media (max-width:900px){.cols{grid-template-columns:1fr}}
+aside{position:sticky; top:14px}
+@media (max-width:900px){aside{position:static}}
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:var(--r)}
+.panel-h{padding:11px 14px; border-bottom:1px solid var(--line-2);
+  display:flex; justify-content:space-between; align-items:center; gap:8px}
+
+/* area rail */
+.arearow{display:block; width:100%; text-align:left; padding:9px 13px;
+  border-bottom:1px solid var(--line-2); position:relative}
+.arearow:last-child{border-bottom:none}
+.arearow:hover{background:var(--surface-2)}
+.arearow[aria-pressed="true"]{background:var(--accent-wash)}
+.arearow[aria-pressed="true"]::before{content:""; position:absolute; left:0; top:0; bottom:0;
+  width:3px; background:var(--accent)}
+.arearow .top{display:flex; justify-content:space-between; align-items:baseline; gap:8px}
+.arearow .nm{font-size:12.5px; font-weight:500; line-height:1.3}
+.arearow .pc{font-size:12px; font-weight:600; flex:none}
+.arearow .meta{font-size:10.5px; color:var(--muted); margin-top:2px; display:flex; gap:7px}
+.bar{height:3px; background:var(--sunken); border-radius:2px; margin-top:6px; overflow:hidden}
+.bar i{display:block; height:100%; border-radius:2px; transition:width .35s ease}
+
+/* toolbar */
+.toolbar{display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:11px 13px;
+  border-bottom:1px solid var(--line-2)}
+input[type="search"],input[type="text"],select,textarea{
+  font:inherit; font-size:12.5px; padding:6px 9px; border:1px solid var(--line);
+  border-radius:5px; background:var(--surface-2); color:var(--ink)}
+input[type="search"]{flex:1 1 190px; min-width:130px}
+select{cursor:pointer}
+.chipbar{display:flex; gap:4px; flex-wrap:wrap}
+.chip{font-size:11px; font-weight:600; padding:4px 9px; border-radius:20px;
+  border:1px solid var(--line); color:var(--muted); background:var(--surface)}
+.chip:hover{border-color:var(--accent); color:var(--accent-ink)}
+.chip[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:#fff}
+.chip.sev-blocker[aria-pressed="true"]{background:var(--blocker); border-color:var(--blocker)}
+.chip.sev-critical[aria-pressed="true"]{background:var(--fail); border-color:var(--fail)}
+.chip.sev-high[aria-pressed="true"]{background:var(--partial); border-color:var(--partial)}
+
+/* ---------- rule rows ---------- */
+.rule{border-bottom:1px solid var(--line-2); position:relative}
+.rule:last-child{border-bottom:none}
+.rule::before{content:""; position:absolute; left:0; top:0; bottom:0; width:3px}
+.rule.sev-blocker::before{background:var(--blocker)}
+.rule.sev-critical::before{background:var(--fail)}
+.rule.sev-high::before{background:var(--partial)}
+.rule.sev-medium::before{background:var(--line)}
+.rule.sev-low::before{background:var(--line-2)}
+.rule-head{display:flex; gap:11px; align-items:flex-start; padding:11px 13px 11px 16px;
+  flex-wrap:wrap}
+.rule-open{flex:1 1 320px; min-width:0; text-align:left; display:flex; gap:9px;
+  align-items:flex-start}
+.rule-open:hover .rt{color:var(--accent-ink)}
+.caret{color:var(--muted); font-size:10px; line-height:1.7; flex:none; width:9px;
+  transition:transform .16s ease}
+.rule.open .caret{transform:rotate(90deg)}
+.rid{font-size:11px; font-weight:600; color:var(--muted); flex:none; letter-spacing:.01em}
+.rt{font-size:13.5px; font-weight:500; line-height:1.4; margin-top:-1px}
+.tagline{display:flex; gap:6px; flex-wrap:wrap; margin-top:5px; align-items:center}
+.sev{font-size:9.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+  padding:2px 6px; border-radius:3px; border:1px solid}
+.sev-b-blocker{color:var(--blocker); border-color:color-mix(in srgb,var(--blocker) 42%,transparent);
+  background:var(--fail-wash)}
+.sev-b-critical{color:var(--fail); border-color:color-mix(in srgb,var(--fail) 40%,transparent);
+  background:var(--fail-wash)}
+.sev-b-high{color:var(--partial); border-color:color-mix(in srgb,var(--partial) 42%,transparent);
+  background:var(--partial-wash)}
+.sev-b-medium{color:var(--muted); border-color:var(--line); background:var(--surface-2)}
+.sev-b-low{color:var(--muted); border-color:var(--line-2); background:var(--surface-2)}
+.tg{font-size:10.5px; color:var(--muted); padding:1px 6px; border-radius:3px;
+  background:var(--surface-2); border:1px solid var(--line-2)}
+.tg.lim{color:var(--accent-ink); background:var(--accent-wash);
+  border-color:color-mix(in srgb,var(--accent) 26%,transparent); font-weight:600}
+.tg.inf{font-style:italic}
+
+/* segmented result control */
+.seg{display:flex; flex:none; border:1px solid var(--line); border-radius:5px;
+  overflow:hidden; background:var(--surface-2); align-self:flex-start}
+.seg button{font-size:10.5px; font-weight:600; padding:5px 9px; color:var(--muted);
+  border-right:1px solid var(--line); letter-spacing:.02em}
+.seg button:last-child{border-right:none}
+.seg button:hover{background:var(--surface); color:var(--ink)}
+.seg button[aria-pressed="true"]{color:#fff}
+.seg button.v-pass[aria-pressed="true"]{background:var(--pass)}
+.seg button.v-partial[aria-pressed="true"]{background:var(--partial)}
+.seg button.v-fail[aria-pressed="true"]{background:var(--fail)}
+.seg button.v-na[aria-pressed="true"]{background:var(--na)}
+.seg button.v-unknown[aria-pressed="true"]{background:var(--unknown)}
+
+/* rule detail */
+.detail{padding:2px 16px 16px 32px; display:grid; gap:13px}
+.detail dl{margin:0; display:grid; gap:11px}
+.dt{font-size:10px; font-weight:600; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--muted); margin-bottom:3px}
+.dd{margin:0; font-size:13.5px; line-height:1.5; color:var(--ink-2);
+  font-family:"IBM Plex Serif",Georgia,serif; max-width:72ch}
+.dd.plain{font-family:"IBM Plex Sans",sans-serif; font-size:13px}
+.limitbox{background:var(--accent-wash); border:1px solid color-mix(in srgb,var(--accent) 26%,transparent);
+  border-radius:5px; padding:9px 12px}
+.limitbox .lv{font-size:16px; font-weight:600; color:var(--accent-ink); letter-spacing:-.02em}
+.limitbox .lw{font-size:12px; color:var(--ink-2); margin-top:2px}
+.checkbox-note{background:var(--surface-2); border:1px solid var(--line-2);
+  border-radius:5px; padding:9px 12px; font-size:12.5px; color:var(--ink-2)}
+.checkbox-note .m{font-size:10px; font-weight:600; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--accent-ink); background:var(--accent-wash); padding:1px 6px; border-radius:3px;
+  margin-right:7px}
+.srcs{display:flex; flex-wrap:wrap; gap:6px}
+.srcs a{font-size:11.5px; color:var(--accent-ink); text-decoration:none; padding:2px 8px;
+  border:1px solid var(--line); border-radius:4px; background:var(--surface-2)}
+.srcs a:hover{border-color:var(--accent); background:var(--accent-wash)}
+.srcs span{font-size:11.5px; color:var(--muted); padding:2px 8px; border:1px dashed var(--line);
+  border-radius:4px}
+.inputs{display:grid; grid-template-columns:repeat(auto-fit,minmax(168px,1fr)); gap:9px}
+.inputs label{display:block}
+.inputs .lb{font-size:10px; font-weight:600; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--muted); margin-bottom:3px}
+.inputs input,.inputs textarea{width:100%}
+.inputs textarea{resize:vertical; min-height:34px; font-size:12.5px}
+.warn{font-size:12.5px; color:var(--ink-2); background:var(--partial-wash);
+  border:1px solid color-mix(in srgb,var(--partial) 34%,transparent);
+  border-radius:5px; padding:8px 11px}
+
+/* triage */
+.tri{counter-reset:step; display:grid; gap:0}
+.tri .rule::after{counter-increment:step; content:counter(step);
+  position:absolute; left:17px; top:12px; font-size:10px; font-weight:700;
+  color:var(--surface); background:var(--accent); width:16px; height:16px;
+  border-radius:50%; display:grid; place-items:center;
+  font-family:"IBM Plex Mono",monospace}
+.tri .rule-head{padding-left:41px}
+.tri .detail{padding-left:41px}
+.tri .why{font-size:12.5px; color:var(--muted); font-style:italic; margin-top:4px;
+  font-family:"IBM Plex Serif",Georgia,serif}
+
+/* tables */
+.tblwrap{overflow-x:auto}
+table{border-collapse:collapse; width:100%; font-size:12.5px; min-width:600px}
+th{text-align:left; font-size:10px; font-weight:600; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--muted); padding:9px 12px;
+  border-bottom:1px solid var(--line); white-space:nowrap; background:var(--surface-2)}
+td{padding:9px 12px; border-bottom:1px solid var(--line-2); vertical-align:top;
+  line-height:1.45}
+tr:last-child td{border-bottom:none}
+td.v{font-weight:600; color:var(--accent-ink); white-space:nowrap}
+td.hard{white-space:nowrap}
+.pill{font-size:9.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  padding:2px 6px; border-radius:3px; border:1px solid var(--line);
+  color:var(--muted); background:var(--surface-2)}
+.pill.h{color:var(--fail); border-color:color-mix(in srgb,var(--fail) 36%,transparent);
+  background:var(--fail-wash)}
+
+.empty{padding:44px 20px; text-align:center; color:var(--muted); font-size:13px}
+.foot{margin-top:24px; font-size:11.5px; color:var(--muted); line-height:1.6;
+  border-top:1px solid var(--line); padding-top:14px}
+.sync{font-size:11px; color:var(--muted); display:flex; align-items:center; gap:5px}
+.sync .d{width:6px; height:6px; border-radius:50%; background:var(--line)}
+.sync.on .d{background:var(--pass)}
+.sync.local .d{background:var(--partial)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important; animation:none!important}}
+[hidden]{display:none!important}
+</style>
+
+<header class="mast">
+  <div class="mast-in">
+    <div class="brand">
+      <p class="eyebrow">Copilot &amp; Fabric data agent readiness</p>
+      <h1>Fabric AI Readiness Console</h1>
+      <p class="sub">Rule pack <b class="mono" id="packv"></b> · <b id="rulen"></b> rules ·
+        <b id="arean"></b> areas · scoped to enablement, usage, response validity and query cost</p>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div class="score">
+      <div class="gauge">
+        <svg viewBox="0 0 104 104" aria-hidden="true">
+          <circle cx="52" cy="52" r="44" fill="none" stroke="var(--sunken)" stroke-width="9"></circle>
+          <circle id="arc" cx="52" cy="52" r="44" fill="none" stroke="var(--accent)"
+            stroke-width="9" stroke-linecap="round" stroke-dasharray="276.5" stroke-dashoffset="276.5"></circle>
+        </svg>
+        <div class="val"><span class="num mono" id="ov">0</span><span class="den mono">OF 100</span></div>
+      </div>
+      <div class="ladder" id="ladder"></div>
+    </div>
+  </div>
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+</header>
+
+<div class="wrap">
+  <div id="banners"></div>
+
+  <!-- ASSESS -->
+  <section id="p-assess" role="tabpanel">
+    <div class="cols">
+      <aside>
+        <div class="panel">
+          <div class="panel-h">
+            <span class="eyebrow">Areas by score</span>
+            <button class="btn" id="clearArea" hidden>All</button>
+          </div>
+          <div id="arealist"></div>
+        </div>
+        <div class="panel" style="margin-top:14px">
+          <div class="panel-h"><span class="eyebrow">Assessment</span>
+            <span class="sync" id="sync"><span class="d"></span><span class="t">local</span></span>
+          </div>
+          <div style="padding:12px 13px; display:grid; gap:9px">
+            <label><span class="lb eyebrow" style="display:block;margin-bottom:3px">Scope</span>
+              <input type="text" id="scopeName" placeholder="Tenant, models, agents in scope"
+                style="width:100%"></label>
+            <label><span class="lb eyebrow" style="display:block;margin-bottom:3px">Assessor</span>
+              <input type="text" id="scopeWho" placeholder="Your name" style="width:100%"></label>
+            <button class="btn primary" id="expEv">Export evidence JSON</button>
+            <button class="btn" id="expMd">Export findings</button>
+            <button class="btn" id="reset">Reset assessment</button>
+            <p style="font-size:11px;color:var(--muted);line-height:1.5;margin-top:2px">
+              The evidence JSON feeds <span class="mono">assess.py</span> directly, so the console
+              and the CLI score the same file.</p>
+          </div>
+        </div>
+      </aside>
+      <main>
+        <div class="panel">
+          <div class="toolbar">
+            <input type="search" id="q" placeholder="Search rules, requirements, tags…"
+              aria-label="Search rules">
+            <select id="fresult" aria-label="Filter by result">
+              <option value="">All results</option><option value="unknown">Unassessed</option>
+              <option value="pass">Pass</option><option value="partial">Partial</option>
+              <option value="fail">Fail</option><option value="na">N/A</option>
+              <option value="open">Open (fail or partial)</option>
+            </select>
+            <div class="chipbar" id="sevchips"></div>
+            <span style="flex:1"></span>
+            <span class="eyebrow" id="shown"></span>
+          </div>
+          <div id="rules"></div>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- TRIAGE -->
+  <section id="p-triage" role="tabpanel" hidden>
+    <div class="panel" style="margin-top:4px">
+      <div class="panel-h" style="display:block; padding:14px">
+        <h2 style="font-size:16px">Diagnosing broad-scan behaviour</h2>
+        <p style="font-size:13px; color:var(--ink-2); margin-top:6px; max-width:76ch;
+          font-family:'IBM Plex Serif',Georgia,serif; line-height:1.6">
+          When the presenting symptom is that Copilot or an agent scans everything before it answers,
+          work these nine rules in order. Steps 1&ndash;3 diagnose; steps 4&ndash;9 are the fixes, in
+          rough descending order of effect per unit of effort. Marking a result here updates the
+          same assessment.</p>
+      </div>
+      <div class="tri" id="triage"></div>
+    </div>
+  </section>
+
+  <!-- LIMITS -->
+  <section id="p-limits" role="tabpanel" hidden>
+    <div class="panel" style="margin-top:4px">
+      <div class="panel-h" style="display:block; padding:14px">
+        <h2 style="font-size:16px">Platform limits encoded in the pack</h2>
+        <p style="font-size:13px; color:var(--ink-2); margin-top:6px; max-width:76ch;
+          font-family:'IBM Plex Serif',Georgia,serif; line-height:1.6">
+          Hard limits are enforced by the platform and failing them is not a matter of degree.
+          Soft limits are published guidance. Every value here traces to a cited source.</p>
+      </div>
+      <div class="tblwrap"><table id="limits"></table></div>
+    </div>
+  </section>
+
+  <!-- SOURCES -->
+  <section id="p-sources" role="tabpanel" hidden>
+    <div class="panel" style="margin-top:4px">
+      <div class="panel-h" style="display:block; padding:14px">
+        <h2 style="font-size:16px">Sources</h2>
+        <p style="font-size:13px; color:var(--ink-2); margin-top:6px; max-width:76ch;
+          font-family:'IBM Plex Serif',Georgia,serif; line-height:1.6">
+          Every rule cites at least one. Rules marked <em>inferred</em> are engineering judgement
+          built on documented platform behaviour rather than a published requirement &mdash;
+          calibrate those to your own risk appetite.</p>
+      </div>
+      <div class="tblwrap"><table id="srctbl"></table></div>
+    </div>
+  </section>
+
+  <p class="foot" id="foot"></p>
+</div>
+
+<script>
+const PACK = /*__RULEPACK__*/ null;
+const RULES = PACK.rules, SEV = PACK.severities, ST = PACK.resultStates;
+const AREAW = PACK.areaWeights, BANDS = PACK.maturityLevels, SRC = PACK.sources;
+const BYID = Object.fromEntries(RULES.map(r => [r.id, r]));
+const AREA_T = Object.fromEntries(PACK.areas.map(a => [a.id, a.title]));
+const ORDER = ["blocker","critical","high","medium","low"];
+const STATES = ["pass","partial","fail","na","unknown"];
+const KEY = "fabric-ai-readiness-v1";
+
+let state = {scope:{name:"",who:""}, results:{}, demo:true};
+let ui = {tab:"assess", area:null, sev:new Set(), q:"", result:"", open:new Set()};
+let db = null, saveT = null, lastPushed = "";
+
+/* ---------- demo seed: shown until the user starts their own ---------- */
+function demoSeed(){
+  const prof = {tenant:.85,capacity:.75,workspace:.55,schema:.3,model:.55,metadata:.35,
+    measures:.5,datatype:.6,security:.65,verified:.2,instructions:.35,agent:.4,
+    performance:.25,validity:.15,operations:.35};
+  let s = 20250910, rnd = () => (s = (s*1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+  const out = {};
+  for (const r of RULES){
+    const p = prof[r.area], x = rnd();
+    out[r.id] = {result: x < p ? "pass" : x < p + .22 ? "partial" : x > .94 ? "unknown" : "fail",
+      evidence:"", note:"", owner:"", dueDate:""};
+  }
+  return out;
+}
+function blank(){
+  const o = {};
+  for (const r of RULES) o[r.id] = {result:"unknown", evidence:"", note:"", owner:"", dueDate:""};
+  return o;
+}
+
+/* ---------- scoring: mirrors assess.py exactly ---------- */
+function weightOf(r){ return SEV[r.severity].weight * (r.weightMultiplier || 1); }
+function compute(){
+  const areas = {}, counts = {};
+  for (const a of PACK.areas){ areas[a.id] = {e:0,p:0}; counts[a.id] = {}; }
+  let gate = [];
+  for (const r of RULES){
+    const res = (state.results[r.id] || {}).result || "unknown";
+    const w = weightOf(r), c = ST[res].credit;
+    counts[r.area][res] = (counts[r.area][res] || 0) + 1;
+    if (c !== null){ areas[r.area].e += c * w; areas[r.area].p += w; }
+    if (SEV[r.severity].gate && (res === "fail" || res === "unknown")) gate.push(r);
+  }
+  const rows = PACK.areas.map(a => {
+    const {e,p} = areas[a.id];
+    return {id:a.id, title:a.title, weight:AREAW[a.id],
+      score: p ? Math.round(1000*e/p)/10 : null, counts:counts[a.id],
+      n: RULES.filter(r => r.area === a.id).length};
+  });
+  const sc = rows.filter(r => r.score !== null);
+  const tw = sc.reduce((s,r) => s + r.weight, 0);
+  const overall = tw ? Math.round(10 * sc.reduce((s,r) => s + r.score*r.weight, 0) / tw)/10 : 0;
+  const band = BANDS.find(b => overall >= b.min && overall <= b.max) || BANDS[0];
+  return {overall, rows, gate, band, effective: gate.length ? BANDS[0] : band};
+}
+
+/* ---------- persistence ---------- */
+function persist(){
+  try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
+  if (!db) return;
+  clearTimeout(saveT);
+  saveT = setTimeout(async () => {
+    const body = {scope:state.scope, results:state.results, demo:false,
+      updatedAt:new Date().toISOString()};
+    lastPushed = JSON.stringify(body.results);
+    try{ await db.doc("assessment/current").set(body); }
+    catch(e){ mark(e.code === "revoked" ? "local" : "local", "local only"); }
+  }, 600);
+}
+function mark(cls, txt){
+  const el = document.getElementById("sync");
+  el.className = "sync " + cls;
+  el.querySelector(".t").textContent = txt;
+}
+async function initDb(){
+  try{ db = await claude.use("db"); }catch(e){ db = null; }
+  if (!db){ mark("local", "saved in this browser"); return; }
+  mark("on", "shared with your team");
+  db.doc("assessment/current").onSnapshot(snap => {
+    if (!snap.exists) return;
+    const d = snap.data();
+    if (!d || !d.results) return;
+    if (JSON.stringify(d.results) === lastPushed) return;
+    state.results = Object.assign(blank(), d.results);
+    if (d.scope) state.scope = d.scope;
+    state.demo = false;
+    const a = document.getElementById("scopeName"), b = document.getElementById("scopeWho");
+    if (document.activeElement !== a) a.value = state.scope.name || "";
+    if (document.activeElement !== b) b.value = state.scope.who || "";
+    render();
+  }, () => mark("local", "saved in this browser"));
+}
+
+/* ---------- render ---------- */
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g,
+  c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function limitText(L){
+  let v = L.value;
+  if (v && typeof v === "object" && !Array.isArray(v))
+    v = Object.entries(v).map(([k,x]) => k + " " + x).join(" · ");
+  else if (Array.isArray(v)) v = v.join("–");
+  return v + " " + L.unit;
+}
+
+function scoreColor(s){
+  if (s === null) return "var(--line)";
+  return s >= 75 ? "var(--pass)" : s >= 60 ? "var(--partial)" : "var(--fail)";
+}
+
+function renderHead(m){
+  document.getElementById("ov").textContent = m.overall;
+  const arc = document.getElementById("arc"), C = 2*Math.PI*44;
+  arc.style.strokeDashoffset = C * (1 - m.overall/100);
+  arc.setAttribute("stroke", m.gate.length ? "var(--fail)" : scoreColor(m.overall));
+  document.getElementById("ladder").innerHTML = BANDS.map(b => {
+    const on = b.level === m.effective.level;
+    return `<div class="step${on?" on":""}${on&&m.gate.length?" gated":""}">
+      <span class="dot"></span><span>${esc(b.name)}</span>
+      <span style="margin-left:auto" class="mono">${b.min}–${Math.floor(b.max)}</span>
+    </div>`;
+  }).join("");
+}
+
+function renderStats(m){
+  let open=0, unk=0, done=0;
+  for (const r of RULES){
+    const res = (state.results[r.id] || {}).result || "unknown";
+    if (res === "fail" || res === "partial") open++;
+    else if (res === "unknown") unk++;
+    else done++;
+  }
+  document.getElementById("stats").innerHTML = [
+    [m.gate.length, "blockers open", m.gate.length ? "var(--fail)" : "var(--pass)"],
+    [open, "findings open", open ? "var(--partial)" : "var(--pass)"],
+    [unk, "unassessed", unk ? "var(--muted)" : "var(--pass)"],
+    [done, "settled", "var(--ink)"]
+  ].map(([n,l,c]) => `<div><div class="n" style="color:${c}">${n}</div>
+    <div class="l">${l}</div></div>`).join("");
+}
+
+function renderBanners(m){
+  const out = [];
+  if (state.demo) out.push(`<div class="banner demo"><div class="body">
+    <b class="bt">Example results, not yours</b>
+    This console opens with a worked example so the scoring is visible. Clear it when you are
+    ready to record your own findings.</div>
+    <button class="btn" id="startMine">Start my assessment</button></div>`);
+  if (m.gate.length) out.push(`<div class="banner gate"><span class="mark">!</span><div class="body">
+    <b class="bt">Maturity gated at ${esc(BANDS[0].name)} &mdash;
+      ${m.gate.length} blocker rule${m.gate.length>1?"s":""} not met</b>
+    A failed or unassessed blocker means the numeric score of ${m.overall} describes an estate that
+    is not fit to expose to business users. Fix these first; the score is for trending only.
+    <div class="gate-list">${m.gate.map(r =>
+      `<button data-goto="${r.id}">${esc(r.id)}</button>`).join("")}</div></div></div>`);
+  else if (m.overall >= 75) out.push(`<div class="banner ok"><div class="body">
+    <b class="bt">No blocker rules outstanding</b>
+    Every blocker is met and the weighted score puts this estate at
+    ${esc(m.effective.name)}. ${esc(m.effective.meaning)}</div></div>`);
+  document.getElementById("banners").innerHTML = out.join("");
+  const sm = document.getElementById("startMine");
+  if (sm) sm.onclick = () => {
+    state.demo = false; state.results = blank(); persist(); render();
+  };
+  document.querySelectorAll("[data-goto]").forEach(b => b.onclick = () => {
+    ui.tab = "assess"; ui.area = null; ui.sev.clear(); ui.q = ""; ui.result = "";
+    document.getElementById("q").value = ""; document.getElementById("fresult").value = "";
+    ui.open.add(b.dataset.goto); render();
+    setTimeout(() => {
+      const el = document.getElementById("r-" + b.dataset.goto);
+      if (el) el.scrollIntoView({behavior:"smooth", block:"center"});
+    }, 60);
+  });
+}
+
+function renderAreas(m){
+  document.getElementById("arealist").innerHTML = m.rows
+    .slice().sort((a,b) => (a.score ?? 999) - (b.score ?? 999))
+    .map(a => {
+      const c = a.counts, open = (c.fail||0) + (c.partial||0), unk = c.unknown||0;
+      return `<button class="arearow" data-area="${a.id}"
+        aria-pressed="${ui.area === a.id}">
+        <span class="top"><span class="nm">${esc(a.title)}</span>
+        <span class="pc mono" style="color:${scoreColor(a.score)}">${a.score === null ? "—" : a.score}</span></span>
+        <span class="meta"><span class="mono">w${a.weight}</span>
+        <span>${a.n} rules</span>
+        ${open ? `<span style="color:var(--fail)">${open} open</span>` : ""}
+        ${unk ? `<span style="color:var(--muted)">${unk} unassessed</span>` : ""}</span>
+        <span class="bar"><i style="width:${a.score === null ? 0 : a.score}%;
+          background:${scoreColor(a.score)}"></i></span></button>`;
+    }).join("");
+  document.querySelectorAll("[data-area]").forEach(b => b.onclick = () => {
+    ui.area = ui.area === b.dataset.area ? null : b.dataset.area; render();
+  });
+  document.getElementById("clearArea").hidden = !ui.area;
+}
+
+function ruleHTML(r, opts){
+  opts = opts || {};
+  const res = (state.results[r.id] || {}).result || "unknown";
+  const ev = state.results[r.id] || {};
+  const isOpen = ui.open.has(r.id);
+  const L = r.limit;
+  let h = `<article class="rule sev-${r.severity}${isOpen ? " open" : ""}" id="r-${r.id}">
+    <div class="rule-head">
+      <button class="rule-open" aria-expanded="${isOpen}" data-toggle="${r.id}">
+        <span class="caret">&#9656;</span>
+        <span style="min-width:0">
+          <span class="rid mono">${esc(r.id)}</span>
+          <span class="rt">${esc(r.title)}</span>
+          ${opts.why ? `<span class="why" style="display:block">${esc(opts.why)}</span>` : ""}
+          <span class="tagline">
+            <span class="sev sev-b-${r.severity}">${esc(r.severity)}</span>
+            <span class="tg">${esc(AREA_T[r.area])}</span>
+            ${L ? `<span class="tg lim mono">${esc(limitText(L))}${L.hard ? " · hard" : ""}</span>` : ""}
+            ${r.verified === "inferred" ? `<span class="tg inf">inferred</span>` : ""}
+            ${(r.tags||[]).includes("core") ? `<span class="tg">core</span>` : ""}
+          </span>
+        </span>
+      </button>
+      <div class="seg" role="group" aria-label="Result for ${esc(r.id)}">
+        ${STATES.map(s => `<button class="v-${s}" data-set="${r.id}" data-val="${s}"
+          aria-pressed="${res === s}" title="${esc(ST[s].description)}">${s === "na" ? "N/A" : s === "unknown" ? "?" : s}</button>`).join("")}
+      </div>
+    </div>`;
+  if (isOpen){
+    const srcs = r.sourceIds.map(id => {
+      const s = SRC[id];
+      if (!s) return "";
+      return s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a>`
+                   : `<span>${esc(s.title)}</span>`;
+    }).join("");
+    h += `<div class="detail">
+      ${L ? `<div class="limitbox"><div class="lv mono">${esc(limitText(L))}</div>
+        <div class="lw">${esc(L.description || "")} ${L.hard ? "This is a hard platform limit." : "Published guidance, not enforced."}</div></div>` : ""}
+      <dl>
+        <div><dt class="dt">Requirement</dt><dd class="dd">${esc(r.requirement)}</dd></div>
+        <div><dt class="dt">Why it matters</dt><dd class="dd">${esc(r.rationale)}</dd></div>
+        <div><dt class="dt">Remediation</dt><dd class="dd plain">${esc(r.remediation)}</dd></div>
+        <div><dt class="dt">If not fixed</dt><dd class="dd plain">${esc(r.impactIfViolated)}</dd></div>
+      </dl>
+      <div class="checkbox-note"><span class="m mono">${esc(r.check.method)}</span>${esc(r.check.how)}
+        ${r.check.threshold !== undefined && typeof r.check.threshold !== "object"
+          ? ` <b class="mono">[${esc(r.check.operator || "")} ${esc(r.check.threshold)}${r.check.unit ? " " + esc(r.check.unit) : ""}]</b>` : ""}</div>
+      ${r.notes ? `<div class="warn">${esc(r.notes)}</div>` : ""}
+      <div class="srcs">${srcs}</div>
+      <div class="inputs">
+        <label><span class="lb">Evidence</span>
+          <input type="text" id="ev-${r.id}" data-fld="evidence" data-id="${r.id}"
+            value="${esc(ev.evidence)}" placeholder="Where the proof lives"></label>
+        <label><span class="lb">Owner</span>
+          <input type="text" id="ow-${r.id}" data-fld="owner" data-id="${r.id}"
+            value="${esc(ev.owner)}" placeholder="Who fixes it"></label>
+        <label><span class="lb">Due</span>
+          <input type="text" id="du-${r.id}" data-fld="dueDate" data-id="${r.id}"
+            value="${esc(ev.dueDate)}" placeholder="2026-10-31"></label>
+        <label><span class="lb">Note</span>
+          <textarea id="nt-${r.id}" data-fld="note" data-id="${r.id}"
+            placeholder="Anything the next assessor needs">${esc(ev.note)}</textarea></label>
+      </div>
+    </div>`;
+  }
+  return h + "</article>";
+}
+
+function visible(){
+  const q = ui.q.trim().toLowerCase();
+  return RULES.filter(r => {
+    if (ui.area && r.area !== ui.area) return false;
+    if (ui.sev.size && !ui.sev.has(r.severity)) return false;
+    const res = (state.results[r.id] || {}).result || "unknown";
+    if (ui.result === "open"){ if (res !== "fail" && res !== "partial") return false; }
+    else if (ui.result && res !== ui.result) return false;
+    if (q){
+      const hay = (r.id + " " + r.title + " " + r.requirement + " " + r.rationale + " " +
+        r.remediation + " " + (r.tags||[]).join(" ") + " " + AREA_T[r.area]).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  }).sort((a,b) => ORDER.indexOf(a.severity) - ORDER.indexOf(b.severity) ||
+    weightOf(b) - weightOf(a) || a.id.localeCompare(b.id));
+}
+
+function renderRules(){
+  const v = visible();
+  document.getElementById("shown").textContent =
+    v.length + " of " + RULES.length + " shown";
+  document.getElementById("rules").innerHTML = v.length
+    ? v.map(r => ruleHTML(r)).join("")
+    : `<p class="empty">No rules match these filters.</p>`;
+}
+
+function renderTriage(){
+  document.getElementById("triage").innerHTML =
+    PACK.triage.map(t => ruleHTML(BYID[t.id], {why:t.why})).join("");
+}
+
+function renderStatic(){
+  const lim = RULES.filter(r => r.limit);
+  document.getElementById("limits").innerHTML =
+    `<thead><tr><th>Rule</th><th>Limit</th><th>Enforced</th><th>What it means</th>
+      <th>Area</th></tr></thead><tbody>` +
+    lim.map(r => `<tr><td class="mono"><a href="#" data-goto="${r.id}"
+        style="color:var(--accent-ink);text-decoration:none">${esc(r.id)}</a></td>
+      <td class="v mono">${esc(limitText(r.limit))}</td>
+      <td class="hard"><span class="pill${r.limit.hard ? " h" : ""}">${r.limit.hard ? "hard" : "soft"}</span></td>
+      <td>${esc(r.limit.description || r.title)}</td>
+      <td>${esc(AREA_T[r.area])}</td></tr>`).join("") + "</tbody>";
+  document.getElementById("srctbl").innerHTML =
+    `<thead><tr><th>Source</th><th>Rules</th><th>Note</th></tr></thead><tbody>` +
+    Object.entries(SRC).map(([id,s]) => {
+      const n = RULES.filter(r => r.sourceIds.includes(id)).length;
+      return `<tr><td>${s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener"
+        style="color:var(--accent-ink);text-decoration:none">${esc(s.title)}</a>`
+        : esc(s.title)}</td><td class="mono">${n}</td>
+        <td style="color:var(--muted)">${esc(s.note || "")}</td></tr>`;
+    }).join("") + "</tbody>";
+}
+
+function render(){
+  const m = compute();
+  renderHead(m); renderStats(m); renderBanners(m); renderAreas(m);
+  document.querySelectorAll("[role=tabpanel]").forEach(p =>
+    p.hidden = p.id !== "p-" + ui.tab);
+  document.querySelectorAll("#tabs .tab").forEach(t =>
+    t.setAttribute("aria-selected", t.dataset.tab === ui.tab));
+  if (ui.tab === "assess") renderRules();
+  if (ui.tab === "triage") renderTriage();
+  const s = compute().rows;
+  document.getElementById("foot").innerHTML =
+    `${RULES.length} rules · ${RULES.filter(r=>r.verified==="documented").length} documented, ` +
+    `${RULES.filter(r=>r.verified==="inferred").length} inferred · ` +
+    `${Object.keys(SRC).length} sources · rule pack ${esc(PACK.packVersion)}, ${esc(PACK.updated)}. ` +
+    `Results are recorded per rule and scored with the same weights as the CLI harness and the ` +
+    `workbook. Re-verify documented limits each quarter &mdash; this platform moves.`;
+}
+
+/* ---------- export ---------- */
+async function offer(filename, text){
+  let d = null;
+  try{ d = await claude.use("downloads"); }catch(e){}
+  if (d){
+    try{ await d.save({filename, data:text}); return; }
+    catch(e){ if (e && e.code === "declined") return; }
+  }
+  const w = window.open("", "_blank");
+  if (w){ w.document.write("<pre>" + esc(text) + "</pre>"); w.document.close(); }
+}
+function evidenceJSON(){
+  return JSON.stringify({
+    scope:{tenant:state.scope.name || "", assessor:state.scope.who || "",
+      exportedAt:new Date().toISOString()},
+    _legend:Object.fromEntries(Object.entries(ST).map(([k,v]) => [k, v.description])),
+    results:Object.fromEntries(RULES.map(r => [r.id, state.results[r.id] ||
+      {result:"unknown", evidence:"", note:"", owner:"", dueDate:""}]))
+  }, null, 2);
+}
+function findingsMD(){
+  const m = compute(), L = [];
+  L.push(`# Fabric AI Readiness — findings\n`);
+  L.push(`Rule pack ${PACK.packVersion} · exported ${new Date().toISOString().slice(0,10)}`);
+  if (state.scope.name) L.push(`Scope: ${state.scope.name}`);
+  if (state.scope.who) L.push(`Assessor: ${state.scope.who}`);
+  L.push(`\n## Readiness: ${m.effective.name} (level ${m.effective.level})\n`);
+  L.push(`Weighted score: **${m.overall} / 100**\n`);
+  if (m.gate.length){
+    L.push(`> Gated at level 0: ${m.gate.length} blocker rule(s) not met. Score is for trending only.\n`);
+    m.gate.forEach(r => L.push(`- \`${r.id}\` ${r.title}`));
+    L.push("");
+  }
+  L.push(`## Area scores\n`);
+  L.push(`| Area | Score | Weight | Rules |`);
+  L.push(`|---|---:|---:|---:|`);
+  m.rows.slice().sort((a,b) => (a.score ?? 999) - (b.score ?? 999))
+    .forEach(a => L.push(`| ${a.title} | ${a.score ?? "n/a"} | ${a.weight} | ${a.n} |`));
+  const open = RULES.filter(r => {
+    const s = (state.results[r.id]||{}).result || "unknown";
+    return s === "fail" || s === "partial" || s === "unknown";
+  }).sort((a,b) => ORDER.indexOf(a.severity) - ORDER.indexOf(b.severity) ||
+    weightOf(b) - weightOf(a));
+  L.push(`\n## Remediation plan (${open.length} items)\n`);
+  let cur = null;
+  for (const r of open){
+    if (r.severity !== cur){ cur = r.severity; L.push(`\n### ${cur}\n`); }
+    const e = state.results[r.id] || {};
+    L.push(`**\`${r.id}\` ${r.title}** — _${e.result || "unknown"}_`);
+    L.push(`- Requirement: ${r.requirement}`);
+    L.push(`- Fix: ${r.remediation}`);
+    L.push(`- If not fixed: ${r.impactIfViolated}`);
+    if (e.owner) L.push(`- Owner: ${e.owner}${e.dueDate ? ", due " + e.dueDate : ""}`);
+    if (e.evidence) L.push(`- Evidence: ${e.evidence}`);
+    if (e.note) L.push(`- Note: ${e.note}`);
+    L.push("");
+  }
+  return L.join("\n");
+}
+
+/* ---------- wiring ---------- */
+function boot(){
+  document.getElementById("packv").textContent = PACK.packVersion;
+  document.getElementById("rulen").textContent = RULES.length;
+  document.getElementById("arean").textContent = PACK.areas.length;
+
+  document.getElementById("tabs").innerHTML = [
+    ["assess","Assess", RULES.length],
+    ["triage","Broad-scan triage", PACK.triage.length],
+    ["limits","Limits", RULES.filter(r => r.limit).length],
+    ["sources","Sources", Object.keys(SRC).length]
+  ].map(([k,l,n]) => `<button class="tab" role="tab" data-tab="${k}"
+    aria-selected="${ui.tab===k}">${l}<span class="n">${n}</span></button>`).join("");
+  document.querySelectorAll("#tabs .tab").forEach(t =>
+    t.onclick = () => { ui.tab = t.dataset.tab; render(); });
+
+  document.getElementById("sevchips").innerHTML = ORDER.map(s =>
+    `<button class="chip sev-${s}" data-sev="${s}" aria-pressed="false">${s}</button>`).join("");
+  document.querySelectorAll("[data-sev]").forEach(b => b.onclick = () => {
+    const s = b.dataset.sev;
+    ui.sev.has(s) ? ui.sev.delete(s) : ui.sev.add(s);
+    b.setAttribute("aria-pressed", ui.sev.has(s));
+    renderRules();
+  });
+
+  document.getElementById("q").oninput = e => { ui.q = e.target.value; renderRules(); };
+  document.getElementById("fresult").onchange = e => { ui.result = e.target.value; renderRules(); };
+  document.getElementById("clearArea").onclick = () => { ui.area = null; render(); };
+
+  for (const [id, k] of [["scopeName","name"],["scopeWho","who"]]){
+    document.getElementById(id).oninput = e => { state.scope[k] = e.target.value; persist(); };
+  }
+  document.getElementById("expEv").onclick = () =>
+    offer("fabric-ai-readiness-evidence.json", evidenceJSON());
+  document.getElementById("expMd").onclick = () =>
+    offer("fabric-ai-readiness-findings.md", findingsMD());
+  document.getElementById("reset").onclick = () => {
+    state.results = blank(); state.demo = false; persist(); render();
+  };
+
+  /* delegated: result buttons, row toggles, field edits */
+  document.body.addEventListener("click", e => {
+    const set = e.target.closest("[data-set]");
+    if (set){
+      const id = set.dataset.set;
+      state.results[id] = Object.assign({result:"unknown", evidence:"", note:"",
+        owner:"", dueDate:""}, state.results[id], {result:set.dataset.val});
+      state.demo = false; persist(); render(); return;
+    }
+    const tog = e.target.closest("[data-toggle]");
+    if (tog){
+      const id = tog.dataset.toggle;
+      ui.open.has(id) ? ui.open.delete(id) : ui.open.add(id);
+      ui.tab === "triage" ? renderTriage() : renderRules(); return;
+    }
+    const go = e.target.closest("a[data-goto]");
+    if (go){
+      e.preventDefault();
+      ui.tab = "assess"; ui.open.add(go.dataset.goto); render();
+      setTimeout(() => document.getElementById("r-" + go.dataset.goto)
+        ?.scrollIntoView({behavior:"smooth", block:"center"}), 60);
+    }
+  });
+  document.body.addEventListener("input", e => {
+    const f = e.target.closest("[data-fld]");
+    if (!f) return;
+    const id = f.dataset.id;
+    state.results[id] = Object.assign({result:"unknown", evidence:"", note:"",
+      owner:"", dueDate:""}, state.results[id]);
+    state.results[id][f.dataset.fld] = f.value;
+    state.demo = false; persist();
+  });
+
+  /* restore */
+  let restored = false;
+  try{
+    const raw = localStorage.getItem(KEY);
+    if (raw){
+      const s = JSON.parse(raw);
+      if (s && s.results){
+        state = {scope:s.scope || {name:"",who:""},
+          results:Object.assign(blank(), s.results), demo:!!s.demo};
+        restored = true;
+      }
+    }
+  }catch(e){}
+  if (!restored) state.results = demoSeed();
+  document.getElementById("scopeName").value = state.scope.name || "";
+  document.getElementById("scopeWho").value = state.scope.who || "";
+
+  renderStatic();
+  render();
+  if (window.claude && claude.use) initDb();
+}
+boot();
+</script>

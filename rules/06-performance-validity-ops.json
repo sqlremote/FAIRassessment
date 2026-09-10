@@ -1,0 +1,883 @@
+{
+ "rules": [
+  {
+   "id": "PRF-001",
+   "area": "performance",
+   "title": "The semantic model is performance-tuned before any AI tuning begins",
+   "requirement": "Semantic model performance optimization must be completed before Prep for AI configuration, and it is step one of the documented implementation workflow.",
+   "rationale": "Stated as the starting point: optimize the semantic model for performance first, because a well-optimized model achieves faster query execution and poor performance directly degrades the user experience. No amount of prompt tuning compensates for a model that is slow to query.",
+   "severity": "critical",
+   "type": "performance",
+   "appliesTo": [
+    "copilot-powerbi",
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "vpax",
+    "how": "Record model size, refresh duration, and p95 query duration from a representative workload before and after AI enablement.",
+    "operator": "exists",
+    "expected": "documented performance baseline"
+   },
+   "remediation": "Run the Best Practice Analyzer and the Semantic Model Memory Analyzer, fix what they surface, then start AI configuration.",
+   "impactIfViolated": "Every AI question inherits the model's existing slowness and multiplies it by the generator's less efficient DAX.",
+   "sourceIds": [
+    "ms-agent-semantic-model-bp"
+   ],
+   "verified": "documented",
+   "weightMultiplier": 1,
+   "tags": [
+    "performance",
+    "core"
+   ]
+  },
+  {
+   "id": "PRF-002",
+   "area": "performance",
+   "title": "Best Practice Analyzer runs as a gate, not an occasional review",
+   "requirement": "The Best Practice Analyzer must run against every in-scope model on each release, with results triaged and material findings resolved before deployment.",
+   "rationale": "Named as the recommended tool for identifying incorrect data types, unnecessary columns, high cardinality columns and inefficient DAX patterns - which are precisely the conditions that make generated queries expensive.",
+   "severity": "high",
+   "type": "performance",
+   "appliesTo": [
+    "copilot-powerbi",
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "api",
+    "how": "Confirm BPA runs in the pipeline and review the open finding count and age.",
+    "operator": "exists",
+    "expected": "automated with triaged results"
+   },
+   "remediation": "Wire BPA into the release pipeline and fail the build on the rule categories you have agreed matter.",
+   "impactIfViolated": "Known-bad patterns accumulate and directly inflate AI query cost.",
+   "sourceIds": [
+    "ms-agent-semantic-model-bp"
+   ],
+   "verified": "documented",
+   "weightMultiplier": 1,
+   "tags": [
+    "performance",
+    "bpa",
+    "alm"
+   ]
+  },
+  {
+   "id": "PRF-003",
+   "area": "performance",
+   "title": "Generated DAX is inspected for scan breadth on representative questions",
+   "requirement": "For each question in the golden set, the generated DAX must be captured and reviewed for storage engine scan breadth - unfiltered fact scans, missing date filters, and full-column materialization.",
+   "rationale": "This is the direct measurement of the behaviour to be prevented. Reviewing the generated DAX in each response is documented practice, and scan breadth is the metric that distinguishes a targeted query from an ad-hoc full scan.",
+   "severity": "critical",
+   "type": "performance",
+   "appliesTo": [
+    "copilot-powerbi",
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "trace",
+    "how": "Capture generated DAX and trace events per golden question. Record storage engine query count, rows scanned, and total duration.",
+    "operator": "lte",
+    "expected": "agreed scan and duration budget per question class"
+   },
+   "remediation": "Where scans are broad, fix the cause: a missing default filter in instructions, a missing pre-built measure, or a missing verified answer.",
+   "impactIfViolated": "Exactly the ad-hoc-SQL-server behaviour - full scans returned as conversational answers, at full capacity cost.",
+   "sourceIds": [
+    "ms-agent-semantic-model-bp",
+    "ms-copilot-semantic-models"
+   ],
+   "verified": "documented",
+   "weightMultiplier": 2,
+   "tags": [
+    "performance",
+    "dax",
+    "core",
+    "scan-breadth"
+   ]
+  },
+  {
+   "id": "PRF-004",
+   "area": "performance",
+   "title": "A latency budget exists per question class and is measured",
+   "requirement": "An explicit response-time budget must be set per question class and measured against real traffic.",
+   "rationale": "Latency is driven by schema breadth and instruction complexity, both of which are under your control. Without a budget there is no signal telling you when schema drift has started.",
+   "severity": "high",
+   "type": "performance",
+   "appliesTo": [
+    "copilot-powerbi",
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "manual",
+    "how": "Record p50 and p95 response time per question class against the documented budget.",
+    "operator": "lte",
+    "expected": "within budget"
+   },
+   "remediation": "Where the budget is breached, narrow the AI data schema and trim instructions before considering capacity increases.",
+   "impactIfViolated": "Latency regressions go unnoticed until users abandon the feature.",
+   "sourceIds": [
+    "ms-agent-semantic-model-bp",
+    "practice"
+   ],
+   "verified": "inferred",
+   "weightMultiplier": 1,
+   "tags": [
+    "performance",
+    "measurement"
+   ]
+  },
+  {
+   "id": "PRF-005",
+   "area": "performance",
+   "title": "Token cost per question is measured and budgeted",
+   "requirement": "Average input and output tokens per question must be measured per agent, converted to CU seconds, and tracked against a budget.",
+   "rationale": "Instructions, source instructions, example queries and conversation history are all billed as input tokens on every request, and output bills at four times the uncached input rate. Token growth is the mechanism by which good intentions become an unaffordable AI surface.",
+   "severity": "critical",
+   "type": "performance",
+   "appliesTo": [
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "metrics",
+    "how": "From Capacity Metrics AI Query operations, derive average input and output tokens per request and the resulting CU seconds. Track the trend.",
+    "operator": "lte",
+    "expected": "within documented per-question CU budget"
+   },
+   "remediation": "Trim instructions and examples, exploit cached input where prompt prefixes are stable - cached input is billed at a tenth of the uncached rate - and shift recurring questions to verified answers.",
+   "impactIfViolated": "Per-question cost drifts upward invisibly until the capacity throttles.",
+   "sourceIds": [
+    "ms-agent-consumption"
+   ],
+   "verified": "documented",
+   "weightMultiplier": 1,
+   "tags": [
+    "performance",
+    "cost",
+    "core"
+   ]
+  },
+  {
+   "id": "PRF-006",
+   "area": "performance",
+   "title": "Prompt prefix stability is preserved to benefit from cached input pricing",
+   "requirement": "Instructions and example queries should be kept stable between requests so that cached input pricing applies.",
+   "rationale": "Cached input bills at 10 CU seconds per 1,000 tokens against 100 for uncached - a tenfold difference on the largest and most repetitive part of every request.",
+   "severity": "medium",
+   "type": "performance",
+   "appliesTo": [
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "manual",
+    "how": "Confirm instruction and example content is not rewritten per request or per user, and review the observed cached-versus-uncached token mix.",
+    "operator": "exists",
+    "expected": "stable prompt prefix"
+   },
+   "remediation": "Avoid dynamic per-user instruction injection; put variability in the question, not the prefix.",
+   "impactIfViolated": "Up to ten times the necessary input token cost on every request.",
+   "sourceIds": [
+    "ms-agent-consumption"
+   ],
+   "verified": "documented",
+   "weightMultiplier": 1,
+   "tags": [
+    "performance",
+    "cost"
+   ]
+  },
+  {
+   "id": "PRF-007",
+   "area": "performance",
+   "title": "Aggregation-first answering is the instructed default",
+   "requirement": "Instructions must direct the agent to aggregate, rank or top-N by default rather than returning detail rows, unless the user explicitly asks for detail.",
+   "rationale": "Combines the documented 25 row by 25 column response cap with documented default-filter guidance. Detail-row answers are simultaneously the most expensive to produce and the most likely to be silently truncated.",
+   "severity": "high",
+   "type": "performance",
+   "appliesTo": [
+    "fabric-data-agent",
+    "copilot-powerbi"
+   ],
+   "check": {
+    "method": "manual",
+    "how": "Review instructions for an aggregation-first default and confirm the behaviour on detail-seeking golden questions.",
+    "operator": "exists",
+    "expected": "aggregation-first default stated"
+   },
+   "remediation": "State it explicitly, and have the agent name the aggregation it chose so users can challenge it.",
+   "impactIfViolated": "Wide, expensive result sets truncated to 25 rows and presented as complete.",
+   "sourceIds": [
+    "ms-concept-data-agent",
+    "ms-agent-best-practices"
+   ],
+   "verified": "inferred",
+   "weightMultiplier": 1,
+   "tags": [
+    "performance",
+    "scan-breadth",
+    "validity"
+   ]
+  },
+  {
+   "id": "PRF-008",
+   "area": "performance",
+   "title": "AI-driven capacity events are correlated with AI usage",
+   "requirement": "Throttling and overload events on AI-enabled capacities must be investigated with AI Query consumption included in the correlation.",
+   "rationale": "Copilot consumes the same capacity as everything else and overconsumption can throttle unrelated Fabric operations. Once capacity is exhausted all operations shut down, so the incident presents as a refresh failure rather than an AI problem.",
+   "severity": "high",
+   "type": "performance",
+   "appliesTo": [
+    "copilot-powerbi",
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "metrics",
+    "how": "For each throttling event, record whether AI Query consumption was examined as a contributing factor.",
+    "operator": "exists",
+    "expected": "AI included in incident analysis"
+   },
+   "remediation": "Add AI Query to the standard capacity incident runbook.",
+   "impactIfViolated": "Repeated incidents misattributed to refresh scheduling while the real driver is AI adoption.",
+   "sourceIds": [
+    "ms-copilot-fabric-overview",
+    "ms-agent-consumption"
+   ],
+   "verified": "documented",
+   "weightMultiplier": 1,
+   "tags": [
+    "performance",
+    "capacity",
+    "operations"
+   ]
+  },
+  {
+   "id": "VAL-001",
+   "area": "validity",
+   "title": "A golden question set exists with expected answers",
+   "requirement": "Each model or agent in scope must have a maintained golden question set with agreed correct answers, covering the declared question scope including edge cases and known-ambiguous phrasings.",
+   "rationale": "Validation and iteration is a documented workflow step, and the accelerator guidance is explicit that retrieval and generation must be evaluated and tuned before production use. Without a fixed question set with known answers, there is nothing to tune against and no way to detect regression.",
+   "severity": "blocker",
+   "type": "validation",
+   "appliesTo": [
+    "copilot-powerbi",
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "manual",
+    "how": "Confirm a golden set exists, covers the declared scope, has agreed expected answers, and has been run within the last release cycle.",
+    "operator": "exists",
+    "expected": "current golden set with expected answers"
+   },
+   "remediation": "Build it from real user questions, agree the correct answer with the business data owner, and version it alongside the model.",
+   "impactIfViolated": "Quality is anecdotal, regressions are invisible, and every tuning decision is a guess.",
+   "sourceIds": [
+    "ms-agent-semantic-model-bp",
+    "azs-cwyd-bp",
+    "ms-rag-experiment"
+   ],
+   "verified": "documented",
+   "weightMultiplier": 2,
+   "tags": [
+    "validity",
+    "testing",
+    "core"
+   ]
+  },
+  {
+   "id": "VAL-002",
+   "area": "validity",
+   "title": "Answer accuracy is scored against the golden set each release",
+   "requirement": "Every release must score the golden question set and record the pass rate, with a defined minimum for promotion to production.",
+   "rationale": "Establishes the regression gate. The accelerators' evaluation discipline - measure, tune configuration, re-measure - is directly transferable even though the retrieval mechanics differ.",
+   "severity": "critical",
+   "type": "validation",
+   "appliesTo": [
+    "copilot-powerbi",
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "manual",
+    "how": "Record pass rate per release and compare against the promotion threshold.",
+    "operator": "gte",
+    "threshold": 90,
+    "unit": "percent of golden questions correct (recommended promotion gate)"
+   },
+   "remediation": "Gate promotion on the threshold. The 90 percent figure is a working default to be calibrated to your risk appetite, not a Microsoft-published number.",
+   "impactIfViolated": "Model or configuration changes silently degrade answers between releases.",
+   "sourceIds": [
+    "azs-cwyd-bp",
+    "ms-rag-experiment",
+    "practice"
+   ],
+   "verified": "inferred",
+   "weightMultiplier": 2,
+   "tags": [
+    "validity",
+    "regression",
+    "core"
+   ]
+  },
+  {
+   "id": "VAL-003",
+   "area": "validity",
+   "title": "Answer relevance is scored separately from accuracy",
+   "requirement": "Responses must be scored for relevance - did the answer address the question asked - separately from numeric correctness.",
+   "rationale": "The RAG evaluation vocabulary separates answer relevance from correctness for good reason: an answer can be arithmetically right and still not respond to what was asked, and the two failures have entirely different fixes.",
+   "severity": "high",
+   "type": "validation",
+   "appliesTo": [
+    "copilot-powerbi",
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "manual",
+    "how": "Score each golden response on a relevance scale in addition to the correctness pass or fail. Track the two independently.",
+    "operator": "gte",
+    "expected": "relevance threshold agreed and met"
+   },
+   "remediation": "Relevance failures point at instructions and terminology mapping; correctness failures point at the model and measures. Route each to the right fix.",
+   "impactIfViolated": "Tuning effort aimed at the wrong layer.",
+   "sourceIds": [
+    "ms-rag-experiment",
+    "azs-cwyd",
+    "azs-cwyd-bp"
+   ],
+   "verified": "inferred",
+   "weightMultiplier": 1,
+   "tags": [
+    "validity",
+    "relevance",
+    "measurement"
+   ]
+  },
+  {
+   "id": "VAL-004",
+   "area": "validity",
+   "title": "Grounding sufficiency is scored - context precision and recall",
+   "requirement": "Each golden question must be scored for whether the AI-visible schema contained everything needed to answer it and nothing that misled it.",
+   "rationale": "Adapted from context precision and context recall. In a natural-language-to-DAX setting the retrieved context is the AI data schema, so precision means the schema was not cluttered with distractors, and recall means nothing required was trimmed away. This is the direct measurement of whether schema reduction has gone too far or not far enough.",
+   "severity": "critical",
+   "type": "validation",
+   "appliesTo": [
+    "copilot-powerbi",
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "manual",
+    "how": "For each failed golden question, classify the cause as missing schema object (recall failure), distracting schema object (precision failure), or generation error. Track the three counts.",
+    "operator": "exists",
+    "expected": "failure causes classified"
+   },
+   "remediation": "Recall failures mean adding back a specific object. Precision failures mean removing one. Generation errors mean a verified answer or a pre-built measure. Never respond to a failure by widening the schema generally.",
+   "impactIfViolated": "Schema is widened reflexively after every failure, which is how models drift back to scanning everything.",
+   "sourceIds": [
+    "ms-rag-experiment",
+    "practice"
+   ],
+   "verified": "inferred",
+   "weightMultiplier": 2,
+   "tags": [
+    "validity",
+    "scope-reduction",
+    "measurement",
+    "core"
+   ]
+  },
+  {
+   "id": "VAL-005",
+   "area": "validity",
+   "title": "Generated DAX is reviewed for every golden question, not just the result",
+   "requirement": "Validation must inspect the generated DAX query in each response, not only whether the returned number looks right.",
+   "rationale": "Stated as a direct requirement: accuracy depends on the generated DAX being correct, and when results are wrong the DAX is what tells you which configuration layer to adjust. A right answer from wrong DAX is a coincidence that will not survive the next question.",
+   "severity": "critical",
+   "type": "validation",
+   "appliesTo": [
+    "copilot-powerbi",
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "manual",
+    "how": "Capture and review generated DAX per golden question; confirm filter context, relationship usage and measure selection are correct.",
+    "operator": "exists",
+    "expected": "DAX reviewed per golden question"
+   },
+   "remediation": "Where the DAX is wrong, identify whether the fix belongs in the model, the AI data schema, verified answers or AI instructions.",
+   "impactIfViolated": "Coincidentally correct answers that fail on the next variation of the same question.",
+   "sourceIds": [
+    "ms-agent-semantic-model-bp"
+   ],
+   "verified": "documented",
+   "weightMultiplier": 2,
+   "tags": [
+    "validity",
+    "dax",
+    "core"
+   ]
+  },
+  {
+   "id": "VAL-006",
+   "area": "validity",
+   "title": "Non-determinism is measured by repeat testing",
+   "requirement": "A subset of golden questions must be asked repeatedly to measure answer variance across runs.",
+   "rationale": "The model is documented as nondeterministic - the same prompt on the same model may produce different results. Variance is a measurable quality attribute and the strongest argument for verified answers on high-consequence questions.",
+   "severity": "high",
+   "type": "validation",
+   "appliesTo": [
+    "copilot-powerbi",
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "manual",
+    "how": "Run a sample of questions several times and record the proportion returning materially different answers.",
+    "operator": "lte",
+    "expected": "variance within agreed tolerance"
+   },
+   "remediation": "For every high-consequence question showing variance, create a verified answer. That converts a probabilistic answer into a deterministic one.",
+   "impactIfViolated": "Two executives ask the same question and get different numbers, which ends the programme.",
+   "sourceIds": [
+    "ms-copilot-semantic-models",
+    "ms-tutorial-prepare-model"
+   ],
+   "verified": "documented",
+   "weightMultiplier": 1,
+   "tags": [
+    "validity",
+    "determinism",
+    "core"
+   ]
+  },
+  {
+   "id": "VAL-007",
+   "area": "validity",
+   "title": "Numeric answers carry a review expectation",
+   "requirement": "User guidance must state that AI-generated numeric answers are to be verified against the source report or model before being relied upon for decisions.",
+   "rationale": "Both the Microsoft guidance and the accelerator guidance say this plainly: inaccurate responses lead to incorrect decisions, and numeric answers should be reviewed against sources. The accelerator adds that its stack is optimized for unstructured data and numeric answers deserve particular scepticism.",
+   "severity": "high",
+   "type": "governance",
+   "appliesTo": [
+    "copilot-powerbi",
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "manual",
+    "how": "Confirm the expectation appears in user-facing guidance and in onboarding material.",
+    "operator": "exists",
+    "expected": "documented and communicated"
+   },
+   "remediation": "State it in onboarding and, where the surface allows, alongside the answer itself.",
+   "impactIfViolated": "Unverified AI numbers enter decisions and reports.",
+   "sourceIds": [
+    "ms-copilot-semantic-models",
+    "azs-cwyd-bp"
+   ],
+   "verified": "documented",
+   "weightMultiplier": 1,
+   "tags": [
+    "validity",
+    "governance",
+    "responsible-ai"
+   ]
+  },
+  {
+   "id": "VAL-008",
+   "area": "validity",
+   "title": "Question scope breadth is matched to schema breadth",
+   "requirement": "The declared question scope must be proportionate to the AI-visible schema: a narrow schema requires a narrow, well-communicated question scope.",
+   "rationale": "The accelerator states the tradeoff directly - the more limited the data set, the broader the questions should be, and more depth requires more available data. Scope reduction is not free; it must be paired with honest communication about what the surface can answer.",
+   "severity": "medium",
+   "type": "governance",
+   "appliesTo": [
+    "copilot-powerbi",
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "manual",
+    "how": "Compare the published question scope against the AI-visible schema and confirm they are consistent.",
+    "operator": "exists",
+    "expected": "scope and schema aligned and published"
+   },
+   "remediation": "Publish what the surface can and cannot answer, and route out-of-scope questions explicitly rather than answering them badly.",
+   "impactIfViolated": "Users ask beyond the schema and receive confident, unsupported answers.",
+   "sourceIds": [
+    "azs-cwyd-bp"
+   ],
+   "verified": "documented",
+   "weightMultiplier": 1,
+   "tags": [
+    "validity",
+    "scope",
+    "communication"
+   ]
+  },
+  {
+   "id": "VAL-009",
+   "area": "validity",
+   "title": "Precision targets are set deliberately per question class",
+   "requirement": "The required precision must be agreed per question class, recognising that higher precision requirements make a response harder to generate at all.",
+   "rationale": "Documented tuning guidance: tune prompt configuration to the level of precision required, and the more precision desired the harder it may be to generate a response. Demanding uniform maximum precision produces refusals and non-answers.",
+   "severity": "medium",
+   "type": "governance",
+   "appliesTo": [
+    "copilot-powerbi",
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "manual",
+    "how": "Confirm question classes carry differentiated precision expectations.",
+    "operator": "exists",
+    "expected": "per-class precision targets"
+   },
+   "remediation": "Reserve strict precision for financial and regulatory questions; allow exploratory questions to be directional.",
+   "impactIfViolated": "Either dangerous imprecision on regulated numbers or a system that refuses to answer exploratory questions.",
+   "sourceIds": [
+    "azs-cwyd-bp"
+   ],
+   "verified": "documented",
+   "weightMultiplier": 1,
+   "tags": [
+    "validity",
+    "tuning"
+   ]
+  },
+  {
+   "id": "VAL-010",
+   "area": "validity",
+   "title": "Configuration changes are evaluated as controlled experiments",
+   "requirement": "Changes to AI data schema, instructions, examples or verified answers must be evaluated by re-running the golden set and comparing scores against the prior configuration, one variable at a time where practical.",
+   "rationale": "This is the core method of the RAG Experiment Accelerator - sweep the tunable parameters, measure with a fixed metric set, keep what improves the score - and the shape the Chat with your data accelerator gives it, where chunking, retrieval type and prompt configuration are an explicit admin surface meant to be tuned against your own data rather than shipped at defaults. The tunable surface here is different (schema breadth, instruction content, example count, verified answer coverage) but the discipline transfers exactly.",
+   "severity": "critical",
+   "type": "validation",
+   "appliesTo": [
+    "copilot-powerbi",
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "manual",
+    "how": "Confirm each configuration change has a before-and-after golden set score recorded against it.",
+    "operator": "exists",
+    "expected": "experiment record per change"
+   },
+   "remediation": "Keep a tuning log: configuration version, what changed, accuracy, relevance, latency, tokens per question. Revert changes that do not earn their place.",
+   "impactIfViolated": "Configuration accretes on intuition; nobody can say which settings are actually helping and none can safely be removed.",
+   "sourceIds": [
+    "ms-rag-experiment",
+    "azs-cwyd",
+    "azs-cwyd-bp"
+   ],
+   "verified": "inferred",
+   "weightMultiplier": 2,
+   "tags": [
+    "validity",
+    "tuning",
+    "alm",
+    "core"
+   ]
+  },
+  {
+   "id": "VAL-011",
+   "area": "validity",
+   "title": "User feedback is captured and routed into the tuning backlog",
+   "requirement": "Thumbs up and down feedback must be collected, reviewed on a defined cadence, and converted into schema, instruction or verified answer changes.",
+   "rationale": "Feedback via the thumbs controls is part of the documented testing loop. Feedback that is collected but never actioned is worse than none, because it signals responsiveness that does not exist.",
+   "severity": "high",
+   "type": "operations",
+   "appliesTo": [
+    "copilot-powerbi",
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "manual",
+    "how": "Confirm feedback is reviewed on a cadence with a named owner, and that items trace to configuration changes.",
+    "operator": "exists",
+    "expected": "active feedback loop"
+   },
+   "remediation": "Review negative feedback each sprint, classify by the VAL-004 failure taxonomy, and act on the classification.",
+   "impactIfViolated": "The strongest available signal about real-world quality is discarded.",
+   "sourceIds": [
+    "ms-tutorial-prepare-model"
+   ],
+   "verified": "documented",
+   "weightMultiplier": 1,
+   "tags": [
+    "validity",
+    "feedback",
+    "operations"
+   ]
+  },
+  {
+   "id": "VAL-012",
+   "area": "validity",
+   "title": "Copilot-generated visual filters are understood as potentially misleading",
+   "requirement": "Reviewers must check whether visuals generated by Copilot carry visual-level filters that a user could not create manually, and communicate this risk.",
+   "rationale": "Documented limitation: Copilot-generated visuals may contain visual-specific filters users cannot create manually, which can be misleading. A visual that cannot be reproduced by hand cannot be independently verified by the user looking at it.",
+   "severity": "medium",
+   "type": "validation",
+   "appliesTo": [
+    "copilot-powerbi"
+   ],
+   "check": {
+    "method": "manual",
+    "how": "Inspect the filter pane on Copilot-generated visuals during golden set review.",
+    "operator": "exists",
+    "expected": "reviewed"
+   },
+   "remediation": "Flag the behaviour in user guidance and treat unreproducible visuals as a reason to build a verified answer instead.",
+   "impactIfViolated": "Users act on a chart whose filtering they cannot see or reproduce.",
+   "sourceIds": [
+    "ms-copilot-semantic-models"
+   ],
+   "verified": "documented",
+   "weightMultiplier": 1,
+   "tags": [
+    "validity",
+    "visuals"
+   ]
+  },
+  {
+   "id": "VAL-013",
+   "area": "validity",
+   "title": "Answers are known to be ephemeral and are not treated as reports",
+   "requirement": "User guidance must state that Copilot answers are static and disappear when the pane closes, so anything needed repeatedly belongs in a report or a verified answer.",
+   "rationale": "Documented behaviour. It also has a cost consequence: users who re-ask the same question daily because there is nowhere to save the answer are paying full generation cost each time.",
+   "severity": "low",
+   "type": "governance",
+   "appliesTo": [
+    "copilot-powerbi"
+   ],
+   "check": {
+    "method": "manual",
+    "how": "Confirm the guidance covers ephemerality and directs recurring needs to reports or verified answers.",
+    "operator": "exists",
+    "expected": "documented"
+   },
+   "remediation": "Track repeatedly asked questions and promote them into reports or verified answers.",
+   "impactIfViolated": "Recurring questions regenerated indefinitely at full cost.",
+   "sourceIds": [
+    "ms-copilot-semantic-models"
+   ],
+   "verified": "documented",
+   "weightMultiplier": 1,
+   "tags": [
+    "validity",
+    "ux",
+    "cost"
+   ]
+  },
+  {
+   "id": "OPS-001",
+   "area": "operations",
+   "title": "AI configuration is under source control",
+   "requirement": "AI data schema, AI instructions and verified answers must be held in source control and deployed through deployment pipelines.",
+   "rationale": "Implementing source control and deployment pipelines is the final documented step of the workflow. AI configuration is production configuration and deserves the same handling as model code.",
+   "severity": "high",
+   "type": "operations",
+   "appliesTo": [
+    "copilot-powerbi",
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "manual",
+    "how": "Confirm the AI configuration is committed to source control and deployed through a pipeline rather than edited directly in production.",
+    "operator": "exists",
+    "expected": "under source control"
+   },
+   "remediation": "Bring Prep for AI configuration into the repository with the model definition, and remember the post-deployment refresh required by SCH-018.",
+   "impactIfViolated": "Production AI behaviour that nobody can reconstruct, review or roll back.",
+   "sourceIds": [
+    "ms-agent-semantic-model-bp",
+    "ms-prepare-data-ai"
+   ],
+   "verified": "documented",
+   "weightMultiplier": 1,
+   "tags": [
+    "alm",
+    "operations",
+    "core"
+   ]
+  },
+  {
+   "id": "OPS-002",
+   "area": "operations",
+   "title": "Adoption and usage are measured, not assumed",
+   "requirement": "Active users, questions per user, question volume by model or agent, and abandonment must be measured and reviewed.",
+   "rationale": "Enablement without usage measurement cannot tell success from silence, and usage also drives the 14-day activity window that keeps instance value indexes fresh.",
+   "severity": "high",
+   "type": "operations",
+   "appliesTo": [
+    "copilot-powerbi",
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "metrics",
+    "how": "Report active users, questions per user and volume by item over the period.",
+    "operator": "exists",
+    "expected": "reported on a cadence"
+   },
+   "remediation": "Add AI usage to the platform reporting pack alongside report usage.",
+   "impactIfViolated": "No basis for investment decisions and no early warning of abandonment.",
+   "sourceIds": [
+    "practice",
+    "ms-prepare-data-ai-faq"
+   ],
+   "verified": "inferred",
+   "weightMultiplier": 1,
+   "tags": [
+    "adoption",
+    "measurement",
+    "operations"
+   ]
+  },
+  {
+   "id": "OPS-003",
+   "area": "operations",
+   "title": "A named owner exists per AI-enabled model and agent",
+   "requirement": "Every AI-enabled semantic model and every data agent must have a named business owner and a named technical owner.",
+   "rationale": "Unapproved models direct users to contact the content owner. If there is no owner, that instruction is a dead end and quality issues have nowhere to go.",
+   "severity": "high",
+   "type": "governance",
+   "appliesTo": [
+    "copilot-powerbi",
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "manual",
+    "how": "Confirm both owners are recorded per item in the register and are current.",
+    "operator": "exists",
+    "expected": "owners recorded"
+   },
+   "remediation": "Assign owners as a precondition of AI enablement.",
+   "impactIfViolated": "Quality issues raised by users go unaddressed and trust decays.",
+   "sourceIds": [
+    "ms-tutorial-prepare-model",
+    "practice"
+   ],
+   "verified": "inferred",
+   "weightMultiplier": 1,
+   "tags": [
+    "governance",
+    "ownership"
+   ]
+  },
+  {
+   "id": "OPS-004",
+   "area": "operations",
+   "title": "This assessment is re-run on a defined cadence",
+   "requirement": "The assessment must be re-run at a defined cadence and on any material model, agent or platform change, with results trended over time.",
+   "rationale": "Every control in this pack decays. Schemas widen, descriptions go stale after renames, instructions accrete, and the platform itself changes underneath - Q&A retirement being a dated example.",
+   "severity": "high",
+   "type": "governance",
+   "appliesTo": [
+    "copilot-powerbi",
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "manual",
+    "how": "Confirm the cadence is defined, the last run date is within it, and scores are trended.",
+    "operator": "exists",
+    "expected": "current assessment with trend"
+   },
+   "remediation": "Schedule it quarterly at minimum, and trigger it on major model or platform changes.",
+   "impactIfViolated": "A one-off assessment that describes a state the estate left months ago.",
+   "sourceIds": [
+    "practice"
+   ],
+   "verified": "inferred",
+   "weightMultiplier": 1,
+   "tags": [
+    "governance",
+    "cadence"
+   ]
+  },
+  {
+   "id": "OPS-005",
+   "area": "operations",
+   "title": "Responsible AI guidance is published to users",
+   "requirement": "User-facing guidance must cover validation expectations, non-determinism, the limits of the question scope, and how to report a wrong answer.",
+   "rationale": "Responsible use guidance is emphasised in both the Microsoft documentation and the accelerator guidance, which states plainly that AI-generated content may be incorrect and should be reviewed before use.",
+   "severity": "medium",
+   "type": "governance",
+   "appliesTo": [
+    "copilot-powerbi",
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "manual",
+    "how": "Confirm the guidance exists, is published where users encounter the AI surface, and covers the four topics.",
+    "operator": "exists",
+    "expected": "published"
+   },
+   "remediation": "Publish it at the point of use rather than burying it in a policy document.",
+   "impactIfViolated": "Users with no framework for judging or challenging AI output.",
+   "sourceIds": [
+    "ms-tutorial-prepare-model",
+    "azs-cwyd-bp"
+   ],
+   "verified": "documented",
+   "weightMultiplier": 1,
+   "tags": [
+    "responsible-ai",
+    "governance"
+   ]
+  },
+  {
+   "id": "OPS-006",
+   "area": "operations",
+   "title": "Data reachable by AI is reviewed against the access model",
+   "requirement": "Before a source is exposed to an AI surface, confirm that its contents are appropriate for every user who can reach that surface, given the effective permission model.",
+   "rationale": "The accelerator states the blunt version - only upload data that can be accessed by any user of the application. Fabric's model is more nuanced because RLS and user identity flow through, but the discipline is the same: enumerate who can reach the surface and confirm the content suits the widest reader.",
+   "severity": "critical",
+   "type": "security",
+   "appliesTo": [
+    "copilot-powerbi",
+    "fabric-data-agent"
+   ],
+   "check": {
+    "method": "manual",
+    "how": "For each AI surface, enumerate the effective audience and confirm a content suitability review has been recorded.",
+    "operator": "exists",
+    "expected": "review recorded per surface"
+   },
+   "remediation": "Where content is not suitable for the widest reader, either narrow the audience or enforce RLS and re-test through the AI path per SEC-002.",
+   "impactIfViolated": "Conversational access materially widens the effective reach of sensitive content.",
+   "sourceIds": [
+    "azs-cwyd-bp",
+    "practice"
+   ],
+   "verified": "documented",
+   "weightMultiplier": 1,
+   "tags": [
+    "security",
+    "governance",
+    "access"
+   ]
+  },
+  {
+   "id": "OPS-007",
+   "area": "operations",
+   "title": "Timeout and error behaviour is monitored",
+   "requirement": "Copilot timeouts and errors, including failures to fetch the LSDL, must be monitored and investigated rather than treated as user error.",
+   "rationale": "Documented behaviour: Copilot capabilities might time out in rare circumstances because the LSDL cannot be fetched, and responses may time out where the model, DAX or data is too complex. A rising timeout rate is a leading indicator of schema and complexity drift.",
+   "severity": "medium",
+   "type": "operations",
+   "appliesTo": [
+    "copilot-powerbi"
+   ],
+   "check": {
+    "method": "manual",
+    "how": "Track timeout and error rate per model over time.",
+    "operator": "lte",
+    "expected": "within agreed threshold and not trending upward"
+   },
+   "remediation": "Investigate rising timeouts as a schema breadth or model complexity problem first.",
+   "impactIfViolated": "A measurable early warning of degradation is discarded as noise.",
+   "sourceIds": [
+    "ms-prepare-data-ai",
+    "ms-copilot-semantic-models"
+   ],
+   "verified": "documented",
+   "weightMultiplier": 1,
+   "tags": [
+    "operations",
+    "monitoring"
+   ]
+  }
+ ]
+}

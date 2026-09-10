@@ -1,0 +1,29 @@
+# assessment evidence — real findings about a real tenant; keep them out of the repo
+evidence.json
+evidence-*.json
+findings.json
+findings.md
+!samples/evidence.template.json
+!samples/evidence.sample.json
+!samples/findings.sample.md
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# editors / os
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# excel lock files
+~$*.xlsx
+
+# scratch
+/tmp/
+*.tmp

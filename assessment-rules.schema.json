@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/fabric-ai-readiness/assessment-rules.schema.json",
+  "title": "Fabric AI Readiness AssessmentRules",
+  "type": "object",
+  "required": ["specVersion","packId","packVersion","severities","resultStates","areaWeights","maturityLevels","scoring","sources","areas","rules"],
+  "properties": {
+    "specVersion": {"type":"string"},
+    "packId": {"type":"string"},
+    "packName": {"type":"string"},
+    "packVersion": {"type":"string"},
+    "updated": {"type":"string"},
+    "description": {"type":"string"},
+    "maintainer": {"type":"string"},
+    "extensionPoints": {"type":"object"},
+    "severities": {
+      "type":"object",
+      "additionalProperties": {
+        "type":"object",
+        "required":["weight","gate","description"],
+        "properties":{"weight":{"type":"number"},"gate":{"type":"boolean"},"description":{"type":"string"}}
+      }
+    },
+    "resultStates": {
+      "type":"object",
+      "additionalProperties": {
+        "type":"object",
+        "required":["credit","description"],
+        "properties":{"credit":{"type":["number","null"]},"description":{"type":"string"}}
+      }
+    },
+    "areaWeights": {"type":"object","additionalProperties":{"type":"number"}},
+    "maturityLevels": {
+      "type":"array",
+      "items":{"type":"object","required":["level","name","min","max","meaning"]}
+    },
+    "scoring": {"type":"object"},
+    "sources": {
+      "type":"object",
+      "additionalProperties":{
+        "type":"object",
+        "required":["title","url"],
+        "properties":{"title":{"type":"string"},"url":{"type":["string","null"]},"retrieved":{"type":"string"},"note":{"type":"string"}}
+      }
+    },
+    "areas": {
+      "type":"array",
+      "items":{"type":"object","required":["id","title","weight","ruleCount"]}
+    },
+    "ruleCount": {"type":"integer"},
+    "rules": {"type":"array","items":{"$ref":"#/$defs/rule"}}
+  },
+  "$defs": {
+    "rule": {
+      "type":"object",
+      "required":["id","area","title","requirement","rationale","severity","type","appliesTo","check","remediation","impactIfViolated","sourceIds","verified"],
+      "properties": {
+        "id":{"type":"string","pattern":"^[A-Z]{3}-[0-9]{3}$","description":"Area prefix plus sequence. Custom rules should use a distinct prefix, e.g. ORG-001."},
+        "area":{"type":"string"},
+        "title":{"type":"string"},
+        "requirement":{"type":"string","description":"Normative statement of what must be true."},
+        "rationale":{"type":"string","description":"Why this matters for enablement, answer quality, or query cost."},
+        "severity":{"enum":["blocker","critical","high","medium","low"]},
+        "type":{"enum":["enablement","limit","config","modeling","naming","metadata","governance","performance","validation","security","operations"]},
+        "appliesTo":{"type":"array","items":{"type":"string"},"description":"Surfaces the rule governs, e.g. copilot-powerbi, fabric-data-agent, copilot-notebooks."},
+        "check":{
+          "type":"object",
+          "required":["method","how"],
+          "properties":{
+            "method":{"enum":["manual","api","dax","tmdl","vpax","metrics","trace","admin-portal"],"description":"How evidence is collected."},
+            "how":{"type":"string"},
+            "operator":{"enum":["equals","exists","in","lt","lte","gt","gte","between","conditional"]},
+            "expected":{},
+            "threshold":{},
+            "unit":{"type":"string"}
+          }
+        },
+        "limit":{
+          "type":"object",
+          "description":"Present when the rule encodes a hard or soft platform limit.",
+          "required":["value","unit"],
+          "properties":{"value":{},"unit":{"type":"string"},"hard":{"type":"boolean"},"description":{"type":"string"}}
+        },
+        "remediation":{"type":"string"},
+        "impactIfViolated":{"type":"string"},
+        "sourceIds":{"type":"array","items":{"type":"string"},"minItems":1},
+        "verified":{"enum":["documented","inferred","community"],"description":"documented = stated in a cited source; inferred = engineering judgement built on cited behaviour; community = unofficial."},
+        "weightMultiplier":{"type":"number","default":1},
+        "tags":{"type":"array","items":{"type":"string"}},
+        "notes":{"type":"string"}
+      }
+    }
+  }
+}

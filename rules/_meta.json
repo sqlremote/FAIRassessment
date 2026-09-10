@@ -1,0 +1,47 @@
+{
+  "$schema": "./assessment-rules.schema.json",
+  "specVersion": "1.0.0",
+  "packId": "fabric-ai-readiness",
+  "packName": "Fabric AI Readiness Assessment",
+  "packVersion": "2026.09.1",
+  "updated": "2026-09-10",
+  "description": "Config-driven rule pack measuring enablement, usage, response validity/relevance and performance posture for Power BI Copilot and Microsoft Fabric data agents. Designed so that AI query generation is narrowly scoped and grounded rather than broad-scanning an unconstrained schema.",
+  "maintainer": "marydev@microsoft.com",
+  "extensionPoints": {
+    "customRuleFiles": ["rules/custom/*.json"],
+    "note": "Drop additional rule files matching the same rule schema into rules/custom/. The harness merges them by id; a custom rule with an existing id overrides the built-in rule of that id."
+  },
+  "severities": {
+    "blocker":  { "weight": 13, "gate": true,  "description": "AI features cannot function or cannot be trusted at all until fixed. A failed blocker caps overall maturity at Not Ready." },
+    "critical": { "weight": 8,  "gate": false, "description": "Materially wrong answers, security exposure, or severe cost/latency. Fix before broad rollout." },
+    "high":     { "weight": 5,  "gate": false, "description": "Frequent ambiguity, degraded relevance, or avoidable capacity burn." },
+    "medium":   { "weight": 3,  "gate": false, "description": "Noticeable quality or efficiency loss; fix during hardening." },
+    "low":      { "weight": 1,  "gate": false, "description": "Polish and consistency; improves long-run maintainability." }
+  },
+  "resultStates": {
+    "pass":  { "credit": 1.0,  "description": "Requirement met and evidenced." },
+    "partial": { "credit": 0.5, "description": "Partially met, e.g. applied to some models/agents but not all in scope." },
+    "fail":  { "credit": 0.0,  "description": "Requirement not met." },
+    "na":    { "credit": null, "description": "Out of scope for this estate; removed from both numerator and denominator." },
+    "unknown": { "credit": 0.0, "description": "Not yet assessed. Scored as fail but reported separately as assessment debt." }
+  },
+  "areaWeights": {
+    "tenant": 10, "capacity": 10, "workspace": 6, "schema": 14, "model": 12,
+    "metadata": 11, "measures": 9, "datatype": 5, "security": 8,
+    "verified": 6, "instructions": 6, "agent": 10, "performance": 9,
+    "validity": 10, "operations": 6
+  },
+  "maturityLevels": [
+    { "level": 0, "name": "Not Ready",    "min": 0,  "max": 39.99, "meaning": "Do not expose Copilot or data agents to business users. Blocking enablement or trust gaps present." },
+    { "level": 1, "name": "Foundational", "min": 40, "max": 59.99, "meaning": "Enabled and technically working, but answers are unreliable and cost/latency is uncontrolled. Pilot with a closed group only." },
+    { "level": 2, "name": "Operational",  "min": 60, "max": 74.99, "meaning": "Scoped and governed for a defined question set. Suitable for a supervised department rollout." },
+    { "level": 3, "name": "Optimized",    "min": 75, "max": 89.99, "meaning": "Grounded, narrow, measured. Answers are repeatable and query cost is bounded. Suitable for broad rollout." },
+    { "level": 4, "name": "AI-Ready",     "min": 90, "max": 100,   "meaning": "Continuously evaluated against a golden question set with regression gates in the release pipeline." }
+  ],
+  "scoring": {
+    "ruleScore": "resultCredit * severityWeight * (rule.weightMultiplier | 1)",
+    "areaScore": "100 * sum(ruleScore in area) / sum(maxRuleScore in area, excluding na)",
+    "overallScore": "sum(areaScore * areaWeight) / sum(areaWeight of areas with at least one applicable rule)",
+    "gate": "If any rule with severity=blocker has result=fail or unknown, overallMaturity is forced to level 0 regardless of numeric score. The numeric score is still reported."
+  }
+}
